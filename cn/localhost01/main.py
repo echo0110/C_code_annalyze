@@ -20,34 +20,43 @@ import threading
 
 import re
 import sys
+import numpy
+import copy   #导入copy模块
 
 def analyzecode():
     log_line = 0
-    log_list = []
+    text2_log_line = 0
+    key = 0
+    # log_list = []
+    log_list = [([0] * 5) for i in range(10)]
+    num_list = numpy.zeros((20, 10))
     file = open(r'D:\4G_code\lteserver\LTE_IPR\lteenodeb\gtpuPacketRelay\egtpu\stack\common\src\egtpu_cdb.c')
     try:
         text_lines = file.readlines()
+        text_lines2 = copy.deepcopy(text_lines)  # 对象拷贝，深拷贝
         print(type(text_lines), text_lines)
-        # print(text_lines[80])
-        # text_lines[59] + text_lines[60] + text_lines[61]
-        print(text_lines[59] + text_lines[60] + text_lines[61])
+        # text_lines2[59] = text_lines2[59] + text_lines2[60] + text_lines2[61]
+        # print(text_lines2[59])
+        # num_list[1] = text_lines[59]
         for line in text_lines:
             log_line = log_line+1
             if u'LOG_MSG' in line:
                 # log_line = file.readline()
                 print(log_line)
                 log_line = log_line - 1
-                # print(type(text_lines), text_lines[log_line-1])
-                log_list.append(line)
+                text2_log_line = log_line
+                print(text_lines2[log_line])
                 while text_lines[log_line].find(";", 0, len(text_lines[log_line]) - 1) == -1:
-                    # log_list[log_line] += text_lines[log_line+1]
-                    log_list.append(text_lines[log_line+1])
-                    log_line += 1
-                print(type(text_lines), log_list[0])
-                print(type(text_lines), log_list[1])
-                print(type(text_lines), log_list[2])
-                print(type(text_lines), log_list)
+                        text_lines2[text2_log_line] += text_lines[log_line+1]
+                        log_line += 1
+                        key += 1
+                # print(type(text_lines2[log_line]), text_lines2[log_line])
+                print(type(text_lines2[text2_log_line]), text_lines2[text2_log_line])
 
+
+
+                # print(type(text_lines), log_list)
+        # print(type(text_lines), log_list)
     finally:
         file.close()
 
