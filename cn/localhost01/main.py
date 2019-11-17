@@ -38,14 +38,15 @@ def analyzecode():
         # text_lines2[59] = text_lines2[59] + text_lines2[60] + text_lines2[61]
         # print(text_lines2[59])
         # num_list[1] = text_lines[59]
-        for line in text_lines:
-            log_line = log_line+1
+        print(text_lines2[80])
+        # for line in text_lines:
+        for i, line in enumerate(text_lines):            # log_line = log_line+1
             if u'LOG_MSG' in line:
                 # log_line = file.readline()
+                log_line = i
                 print(log_line)
-                log_line = log_line - 1
                 text2_log_line = log_line
-                print(text_lines2[log_line])
+                print(text_lines2[text2_log_line])
                 while text_lines[log_line].find(";", 0, len(text_lines[log_line]) - 1) == -1:
                         text_lines2[text2_log_line] += text_lines[log_line+1]
                         log_line += 1
