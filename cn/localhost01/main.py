@@ -103,7 +103,9 @@ def mysqlconnect():
         cursor.execute(sql)
         db.commit()  # 提交到数据库执行，一定要记提交哦
         print("already commit")
-        print(db.insert_id())
+        # print(db.insert_id()) last_id = curs.lastrowid
+        last_id = cursor.lastrowid
+        print(last_id) 
     except Exception as e:
         db.rollback()  # 发生错误时回滚
         print(e)
