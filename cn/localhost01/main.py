@@ -66,10 +66,12 @@ def analyzecode():
                 # pattern = re.compile(r'[(](.*?)[)]')
                 # str1 = re.sub(r'(?<=().+?(?=))', "0", "adod(23d)das")
 
-                pattern = re.compile(r'[(](?:.|\n)*?[)]')
-                # pattern = re.compile(r'[?<=(].+?[?=)]')
-                # str1 = pattern.sub('(8)',  "log_msg(23d)das", re.DOTALL)
-                str1 = pattern.sub('(8)',  text_lines2[text2_log_line], re.DOTALL)
+                # pattern = re.compile(r'[(](?:.|\n)*?[)]')
+                # # pattern = re.compile(r'[?<=(].+?[?=)]')
+                # # str1 = pattern.sub('(8)',  "log_msg(23d)das", re.DOTALL)
+
+                pattern = re.compile(r'["](?:.|\n)*?["]')
+                str1 = pattern.sub('8',  text_lines2[text2_log_line], re.DOTALL)
                 print(str1)
 
 
