@@ -25,6 +25,7 @@ import copy   #导入copy模块
 
 import MySQLdb
 import regex as re
+import datetime
 
 def analyzecode():
     log_line = 0
@@ -83,16 +84,31 @@ def analyzecode():
 
 
 def mysqlconnect():
+    Url = "http://www.baidu.com"
+    Time = datetime.datetime.now()  # 系统当前时刻
     db = MySQLdb.connect("192.168.201.237", "root", "Mysql@123", "TESTDB", charset='utf8')
-# def mysqlconnect():
-#     db = MySQLdb.connect("localhost", "root", "Mysql@123", "TESTDB", charset='utf8')
-#     # 使用cursor()方法获取操作游标
-#     # cursor = db.cursor()
-#         # 使用execute方法执行SQL语句
-#     #     # cursor.execute("SELECT VERSION()")
-#     #     # # 使用 fetchone() 方法获取一条数据
-#     #     # data = cursor.fetchone()
-#     #     # print "Database version : %s " % data
+    # 使用cursor()方法获取操作游标
+    # cursor = db.cursor()
+    # # 使用execute方法执行SQL语句
+    # cursor.execute("SELECT VERSION()")
+    # # 使用 fetchone() 方法获取一条数据
+    # data = cursor.fetchone()
+    # print("Database version : %s " % data)
+
+
+
+    sql = "insert into log_test66(str, time) values('%s','%s')" % (Url, Time)
+    cursor = db.cursor()
+    try:
+        cursor.execute(sql)
+        db.commit()  # 提交到数据库执行，一定要记提交哦
+        print("already commit")
+        print(db.insert_id())
+    except Exception as e:
+        db.rollback()  # 发生错误时回滚
+        print(e)
+    cursor.close()
+
 
 if __name__ == '__main__':
     # 正则：解析留言内容
