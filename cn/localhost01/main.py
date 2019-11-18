@@ -23,6 +23,9 @@ import sys
 import numpy
 import copy   #导入copy模块
 
+import MySQLdb
+import regex as re
+
 def analyzecode():
     log_line = 0
     text2_log_line = 0
@@ -38,7 +41,11 @@ def analyzecode():
         # text_lines2[59] = text_lines2[59] + text_lines2[60] + text_lines2[61]
         # print(text_lines2[59])
         # num_list[1] = text_lines[59]
-        print(text_lines2[80])
+        # print(text_lines2[59])
+        # pattern = re.compile(r'[?<=()](.*?)[?=)]')
+        # str1 = pattern.sub("0",  text_lines2[59])
+        # print(str1)
+
         # for line in text_lines:
         for i, line in enumerate(text_lines):            # log_line = log_line+1
             if u'LOG_MSG' in line:
@@ -46,14 +53,24 @@ def analyzecode():
                 log_line = i
                 print(log_line)
                 text2_log_line = log_line
-                print(text_lines2[text2_log_line])
+                # print(text_lines2[text2_log_line])
                 while text_lines[log_line].find(";", 0, len(text_lines[log_line]) - 1) == -1:
                         text_lines2[text2_log_line] += text_lines[log_line+1]
                         log_line += 1
                         key += 1
                 # print(type(text_lines2[log_line]), text_lines2[log_line])
-                print(type(text_lines2[text2_log_line]), text_lines2[text2_log_line])
+                # print(type(text_lines2[text2_log_line]), text_lines2[text2_log_line])
+                # pattern = re.compile(r'(?<=().+?(?=))')
+                # pattern = re.compile(r'(?<=().+?(?=))')
+                # pattern = re.compile(r'[(](.*?)[)]')
+                # pattern = re.compile(r'[(](.*?)[)]')
+                # str1 = re.sub(r'(?<=().+?(?=))', "0", "adod(23d)das")
 
+                pattern = re.compile(r'[(](?:.|\n)*?[)]')
+                # pattern = re.compile(r'[?<=(].+?[?=)]')
+                # str1 = pattern.sub('(8)',  "log_msg(23d)das", re.DOTALL)
+                str1 = pattern.sub('(8)',  text_lines2[text2_log_line], re.DOTALL)
+                print(str1)
 
 
                 # print(type(text_lines), log_list)
@@ -62,95 +79,24 @@ def analyzecode():
         file.close()
 
 
-    # line = read_file(r'C:\Users\casa\Desktop\logtest.c')
-    # #     # line = read_file('D:/4G_code/lteserver/LTE_IPR/lteenodeb/gtpuPacketRelay/egtpu/stack/common/src/egtpu_cdb.c')
-    # print(line)
-    #     # 行号
-    line_num = 0
-    # 多行注释起始行号
-    line_comment_start = 0
-    comment_start1 = '//'
-    comment_start2 = '/*'
-    comment_end = '*/'
 
-    # for i in line:
-    #     # 去除空白行
-    #     if len(i) < 1:
-    #         line_num = line_num + 1
-    #         continue
-    #     else:
-    #         #  处理注释行
-    #         if cflag == 0:
-    #             if i.startswith(comment_start1):  # 如果是以 // 开头
-    #                 line_num = line_num + 1
-    #                 continue
-    #             elif i.startswith(comment_start2):  # 如果是以 /* 开头
-    #                 line_comment_start = line_num
-    #                 cflag = 1
-    #                 line_num = line_num + 1
-    #                 continue
-    #         elif cflag == 1:
-    #             if i.endswith(comment_end):  # 如果是以 */ 结尾
-    #                 for m in range(line_comment_start, line_num + 1):
-    #                     cflag = 0
-    #                 line_num = line_num + 1
-    #                 continue
-    #             else:
-    #                 line_num = line_num + 1
-    #                 continue
-    #
-    #         line_num = line_num + 1
-    #
-    #     # 存放字符的列表
-    #     each = []
-    #     # 分解每个字符
-    #     for m in i:
-    #         each.append(m)  # 将每个字符添加到列表 each 中
-    #     word = ''
-    #     for e in each:
-    #         # 是操作符
-    #         # 是常数 NUM
-    #         if oflag == 2:
-    #             if e == ' ':
-    #                 NUM_List.append(word)
-    #                 print_List.append('Line:' + str(line_num) + ' ' + word + ', NUM')
-    #                 content_List.append(word)
-    #                 word = ''
-    #                 oflag = 0
-    #             elif e in SEPARATOR:
-    #                 NUM_List.append(word)
-    #                 print_List.append('Line:' + str(line_num) + ' ' + word + ', NUM')
-    #                 content_List.append(word)
-    #                 SEPARATOR_list.append(e)
-    #                 print_List.append('Line:' + str(line_num) + ' ' + e + ', SEPARATOR')
-    #                 content_List.append(e)
-    #                 word = ''
-    #                 oflag = 0
-    #             else:
-    #                 word = word + e
-    #             continue
-    #         # 是关键字或变量名
-    #
-    #         # 是字符串 STRING
-    #         elif oflag == 4:
-    #             if e != '"':
-    #                 word = word + e
-    #             elif e == '"':
-    #                 word = word + e
-    #                 STRING_List.append(word)
-    #                 print_List.append('Line:' + str(line_num) + ' ' + word + ', STRING')
-    #                 content_List.append(word)
-    #                 word = ''
-    #                 oflag = 0
-    #             continue
-
+def mysqlconnect():
+    db = MySQLdb.connect("192.168.201.237", "root", "Mysql@123", "TESTDB", charset='utf8')
+# def mysqlconnect():
+#     db = MySQLdb.connect("localhost", "root", "Mysql@123", "TESTDB", charset='utf8')
+#     # 使用cursor()方法获取操作游标
+#     # cursor = db.cursor()
+#         # 使用execute方法执行SQL语句
+#     #     # cursor.execute("SELECT VERSION()")
+#     #     # # 使用 fetchone() 方法获取一条数据
+#     #     # data = cursor.fetchone()
+#     #     # print "Database version : %s " % data
 
 if __name__ == '__main__':
-
     # 正则：解析留言内容
     # re_note = re.compile(
     #     ur"^留言:[\u3000\u0020]*([\w.-]+@[\w.-]+\.\w+)\s*$")  # 格式; 留言： +任意空格+邮箱
     analyzecode()
-
+    mysqlconnect()
 
 
