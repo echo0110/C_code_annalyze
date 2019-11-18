@@ -72,7 +72,12 @@ def analyzecode():
                 # # str1 = pattern.sub('(8)',  "log_msg(23d)das", re.DOTALL)
 
                 pattern = re.compile(r'["](?:.|\n)*?["]')
-                str1 = pattern.sub('8',  text_lines2[text2_log_line], re.DOTALL)
+                log_str = pattern.findall(text_lines2[text2_log_line])
+                print("x=%s\n", log_str)
+                sql_id = mysqlconnect(log_str)
+                print("sql_id=%d\n", sql_id)
+                sql_id_to_str = '%d' % sql_id
+                str1 = pattern.sub(sql_id_to_str,  text_lines2[text2_log_line], re.DOTALL)
                 print(str1)
 
 
@@ -83,7 +88,7 @@ def analyzecode():
 
 
 
-def mysqlconnect():
+def mysqlconnect(str):
     Url = "http://www.baidu.com"
     Time = datetime.datetime.now()  # 系统当前时刻
     db = MySQLdb.connect("192.168.201.237", "root", "Mysql@123", "TESTDB", charset='utf8')
@@ -97,7 +102,7 @@ def mysqlconnect():
 
 
 
-    sql = "insert into log_test66(str, time) values('%s','%s')" % (Url, Time)
+    sql = "insert into log_test66(str, time) values('%s','%s')" % (str, Time)
     cursor = db.cursor()
     try:
         cursor.execute(sql)
@@ -105,7 +110,8 @@ def mysqlconnect():
         print("already commit")
         # print(db.insert_id()) last_id = curs.lastrowid
         last_id = cursor.lastrowid
-        print(last_id) 
+        print(last_id)
+        return last_id;
     except Exception as e:
         db.rollback()  # 发生错误时回滚
         print(e)
@@ -117,6 +123,6 @@ if __name__ == '__main__':
     # re_note = re.compile(
     #     ur"^留言:[\u3000\u0020]*([\w.-]+@[\w.-]+\.\w+)\s*$")  # 格式; 留言： +任意空格+邮箱
     analyzecode()
-    mysqlconnect()
+    # mysqlconnect()
 
 
