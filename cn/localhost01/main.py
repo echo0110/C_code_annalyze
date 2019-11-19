@@ -49,33 +49,37 @@ def analyzecode():
                         log_line += 1
                         key += 1
                 pattern = re.compile(r'["](?:.|\n)*?["]')
-                log_str = pattern.findall(text_lines2[text2_log_line])
+                log_str = pattern.findall(text_lines[log_line])
                 # print("x=%s\n", log_str)
                 sql_id = mysqlconnect(log_str)
                 print("sql_id=%d\n", sql_id)
-                position = file.tell()
-                print("当前文件位置 : ", position)
                 sql_id_to_str = '%d' % sql_id
-                str1 = pattern.sub(sql_id_to_str,  text_lines2[text2_log_line], re.DOTALL)
+                # str1 = pattern.sub(sql_id_to_str,  text_lines2[text2_log_line], re.DOTALL)
+                str1 = pattern.sub(sql_id_to_str, text_lines[log_line], re.DOTALL)
                 print(str1)
-                # file.write(line.replace(str1, text_lines2[text2_log_line]))
+                # str.replace(text_lines2[text2_log_line], str1)
+                # print(text_lines2[text2_log_line])
+                text_lines[log_line] = str1
+                # print(text_lines2[text2_log_line])
+        file.close()
+        file = open(r'D:\4G_code\lteserver\LTE_IPR\lteenodeb\gtpuPacketRelay\egtpu\stack\common\src\egtpu_cdb.c', 'w')
+        file.writelines(text_lines)
+
     finally:
         file.close()
 
 
-def write_process():
-    # file = open('D:/4G_code/lteserver/LTE_IPR/lteenodeb/gtpuPacketRelay/egtpu/stack/common/src/egtpu_cdb.c', 'w+')
-    file = open(r'D:\4G_code\lteserver\LTE_IPR\lteenodeb\gtpuPacketRelay\egtpu\stack\common\src\egtpu_cdb.c')
-    # txt_file = open(r'C:\Users\casa\Desktop\test.txt', 'w+')
-
-    for line in fileinput.input(r'C:\Users\casa\Desktop\test.txt', inplace=1):
-        if u'Python' in line:
-            i = 0
-            # pattern = re.compile(r'["](?:.|\n)*?["]')
-            # log_str = pattern.findall(line)
-            #
-            # str1 = pattern.sub('8', log_str, re.DOTALL)
-            # file.write(line.replace('8', pattern))
+# def write_process():
+#     # file = open(r'D:\4G_code\lteserver\LTE_IPR\lteenodeb\gtpuPacketRelay\egtpu\stack\common\src\egtpu_cdb.c', 'w')
+#     # sys.stdout = open(r'C:\Users\casa\Desktop\egtpu_cdb.c', 'w')
+#     sys.stdout = open(r'C:\Users\casa\Desktop\test.txt', 'w+')
+#     # temp = sys.stdout
+#     # sys.stdout = file2  # 对象拷贝，深拷贝
+#     # print('hello world')
+#     for line in fileinput.input(r'C:\Users\casa\Desktop\egtpu_cdb.c', inplace=1):
+#         if u'LOG_MSG' in line:
+#             line = line.replace('LOG_MSG', 'print_msg')
+#             sys.stdout.write(line)  # 重定向到文件log.txt中
 
 
 
@@ -99,7 +103,7 @@ def mysqlconnect(str):
 
 
 
-    sql = "insert into log_test66(str, time) values('%s','%s')" % (str, Time)
+    sql = "insert into log_test77(str, time) values('%s','%s')" % (str, Time)
     cursor = db.cursor()
     try:
         cursor.execute(sql)
@@ -119,8 +123,8 @@ if __name__ == '__main__':
     # 正则：解析留言内容
     # re_note = re.compile(
     #     ur"^留言:[\u3000\u0020]*([\w.-]+@[\w.-]+\.\w+)\s*$")  # 格式; 留言： +任意空格+邮箱
-    # analyzecode()
-    write_process()
+    analyzecode()
+    # write_process()
     # mysqlconnect()
 
 
