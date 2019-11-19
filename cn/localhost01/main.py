@@ -44,6 +44,10 @@ def analyzecode():
                 log_line = i
                 print(log_line)
                 text2_log_line = log_line
+                strinfo = re.compile('LOG_MSG')
+                text_lines[log_line] = strinfo.sub('print_msg', text_lines[log_line])
+                # text_lines[log_line].replace('LOG_MSG', 'print_msg')
+                print(text_lines[log_line])
                 while text_lines[log_line].find(";", 0, len(text_lines[log_line]) - 1) == -1:
                         text_lines2[text2_log_line] += text_lines[log_line+1]
                         log_line += 1
