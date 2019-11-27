@@ -1,0 +1,55 @@
+/******************************************************************************
+**
+**  FILE NAME     :  oamh_ed.c
+**
+**  DESCRIPTION   :  This file is the main entry point handler for OAMH Module
+**
+**
+**  DATE        AUTHOR      REF             REASON
+**  --------    -------     ---             ----------
+**  13-May-09   Shashank    DDv0.2          Initial
+**  21-May-09   Shashank    DDv0.2          Review Comments incorporated.
+**  27-May-09   Shashank    DDv0.2      Formal review comments incorporated.
+**  14-Oct-09   OleksandrM  DDv1.41     Global redesign
+**
+**     Copyright (C) 2006 Aricent Inc . All Rights Reserved
+******************************************************************************/
+
+
+/****************************************************************************
+* Includes
+****************************************************************************/
+#include "oamh_fsm.h"
+#include "rrc_oam_il_parser.h"
+#include "rrc_oam_il_composer.h"
+#include "oamh_logger.h"
+#include "rrc_handlers.h"
+#include "rrc_common_md.h"
+#include "rrc_defines.h"
+#include "oamh_timers.h"
+#include "oamh_ed.h"
+#include "rrc_shared_stats.h"
+
+/****************************************************************************
+* Global variables
+****************************************************************************/
+/*Bug 9305 start*/
+extern U32 rrc_health_monitor_val[RRC_MAX_THREADS];
+/*Bug 9305 end*/
+/*Lockless Implementation start*/
+#ifndef LOCKLESS_IMPL
+extern QLOCK rrc_lock;
+#endif
+/*Lockless Implementation stop*/
+
+extern oamh_health_monitor_desriptors_t oamh_health_monitor_desriptors[RRC_MAX_THREADS];
+
+/* Used in logger for identifying OAMH (just for avoid string duplication) */
+const S8* rrc_oamh_log_facility_name = (const S8*)"eNodeB RRC OAMH";
+
+/****************************************************************************
+ Utils
+****************************************************************************/
+#define RRC_OAM_RESET_CELL_STATS_W_FOR_UECC_STATUS 0x01
+#define RRC_OAM_RESET_CELL_STATS_W_FOR_CSC_STATUS  0x02
+

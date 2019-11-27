@@ -1,0 +1,30 @@
+/*******************************************************************************
+*
+*  FILE NAME   : x2ap_tracing.c 
+*
+*  DESCRIPTION : This file contains the definitions of function used for logging
+*                and tracing.
+*
+*  DATE 24-June-2010  NAME Ashutosh Gupta  REFERENCE  36.423_880(3GPP Spec) REASON
+*
+*  Copyright 2007, Aricent Inc.
+*
+*******************************************************************************/
+
+#include "x2ap_tracing.h"
+
+#include "cspl.h"
+#include "stacklayer.h"
+
+
+/*
+*   Global variables
+*/
+
+/* Used in logger for identifying RRC in general
+ *  (just for avoid string duplication) */
+const S8* x2ap_log_facility_name = (const S8*)"eNodeB X2AP";
+
+
+#define FMT_MAX_LEN 255
+

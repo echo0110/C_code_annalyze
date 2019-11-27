@@ -1,0 +1,58 @@
+/****************************************************************************
+ *
+ * ARICENT -
+ *
+ * Copyright (C) 2012 Aricent Inc. All Rights Reserved.
+ *
+ ****************************************************************************
+ *
+ * SPR-612 Coverity Fix Starts
+ * $Id: son_main.c $
+ * SPR-612 Coverity Fix Ends
+ *
+ ****************************************************************************
+ *
+ * File Description: This file contains the main function for the SON which
+ *                   is composed from Apps, ES, ANR, NMM and SMGMTIFH modules
+ *                   and uses CSPL framework.
+ *
+ ****************************************************************************
+ * Revision Details
+ * ----------------
+ *
+ * SPR-612 Coverity Fix Starts
+ * $Log: son_main.c $
+ * SPR-612 Coverity Fix Ends
+ * Revision 0.1  2012/02/18 09:30:00  Shilpi Jain
+ * Initial code
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Project Includes
+ ****************************************************************************/
+#include <son_utils.h>
+#include <son_types.h>
+#ifdef SON_MRO_FEATURE
+#include <son_mro_ctxt_mgr.h>
+#endif
+#include <son_rach_opt_ctxt_mgr.h>
+#include <sched.h>
+#include <pthread.h>
+
+/****************************************************************************
+ * MACRO Definitions
+ ****************************************************************************/
+const son_8 *CONFIG_FILE =  "../cfg/eNodeB_Configuration.cfg";
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+const son_8 *son_log_facility_name = "LTE_SON";
+son_s8 son_log_file[LOG_FILENAME_LEN] = {0};
+son_void_t *p_listener = SON_PNULL;
+son_global_config_params_t g_config_params;
+/* SPR-612 Coverity Fix Starts */
+son_u8 *p_file_name = SON_PNULL; 
+/* SPR-612 Coverity Fix Ends */
+

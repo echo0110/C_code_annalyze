@@ -1,0 +1,2 @@
+SUB_DIRS := protocolSimulator
+

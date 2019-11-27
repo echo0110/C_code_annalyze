@@ -1,0 +1,83 @@
+
+/*************************************************
+bit 0 ---->dlResourcePartitionInfo
+bit 1 ---->ulResourcePartitionInfo
+bit 2 ---->periodicReportConfig
+bit 3 ---->layer1MeasReportConfig
+bit 4 ---->layer2IcicMeasReportConfig
+bit 5 ---->ULPowerMask
+***************************************************/
+BITMASK=24
+/***************  bitmask info for DL **************
+bit 0 ---->cellEdgeRegion
+*********************************************/
+DL_RES_PARTITION_BITMASK=0
+DL_RES_PARTITION_CELL_CENTRE_REGION=6
+DL_RES_PARTITION_CELL_EDGE_REGION=1
+DL_RES_PARTITION_CELL_CENTRE_0_START_RB=0
+DL_RES_PARTITION_CELL_CENTRE_0_NUM_OF_RB=30
+DL_RES_PARTITION_CELL_CENTRE_1_START_RB=1
+DL_RES_PARTITION_CELL_CENTRE_1_NUM_OF_RB=1
+DL_RES_PARTITION_CELL_CENTRE_2_START_RB=2
+DL_RES_PARTITION_CELL_CENTRE_2_NUM_OF_RB=1
+DL_RES_PARTITION_CELL_EDGE_START_RB=40
+DL_RES_PARTITION_CELL_EDGE_NUM_OF_RB=20
+/***************  bitmask info for UL***************
+bit 0 ---->cellEdgeRegion
+*********************************************/
+UL_RES_PARTITION_BITMASK=0
+UL_RES_PARTITION_CELL_CENTRE_REGION=2
+UL_RES_PARTITION_CELL_EDGE_REGION=1
+UL_RES_PARTITION_CELL_CENTRE_0_START_RB=0
+UL_RES_PARTITION_CELL_CENTRE_0_NUM_OF_RB=70
+UL_RES_PARTITION_CELL_CENTRE_1_START_RB=0
+UL_RES_PARTITION_CELL_CENTRE_1_NUM_OF_RB=0
+UL_RES_PARTITION_CELL_EDGE_START_RB=70
+UL_RES_PARTITION_CELL_EDGE_NUM_OF_RB=28
+/***************  bitmask info periodic***************
+bit 0 ---->periodicReportsRequired
+bit 1 ---->Periodicity
+bit 2 ---->batch size
+*********************************************/
+PERIODIC_REP_BITMASK=0
+PERIODIC_REP_REQUIRED=19
+PERIODIC_REP_PERIODICITY=20
+PERIODIC_REP_UE_BATCH_SIZE=20
+
+/***************  bitmask info layer1 MeasReport ******
+bit 0 ---->layer1MeasReportRequired
+bit 1 ---->layer1MeasReportAveragingEnabled
+bit 2 ---->periodicity
+**********************************************/
+
+LAYER1_MEAS_REP_BITMASK=7
+LAYER1_MEAS_REP_REQUIRED=1
+LAYER1_MEAS_REP_AVG_ENABLED=1
+LAYER1_MEAS_REP_PERIODICITY=25
+
+/***************  bitmask info layer2 Icic MeasReport ****
+bit 0 ---->layer2IcicBitmask
+bit 1 ---->layer2PrbCellEdgeRequired
+bit 2 ---->Rntp Report Required
+bit 3 ---->Rntp Report Threshold
+bit 4 ---->Rntp Report MaxNominalEpre
+***********************************************/
+
+LAYER2_MEAS_BITMASK=7
+LAYER2_MEAS_CELLEDGE_PRB_USAGE_REQUIRED=1
+LAYER2_MEAS_RNTP_REPORT_BITMASK=3
+LAYER2_MEAS_RNTP_REPORT_REQUIRED=1
+LAYER2_MEAS_RNTP_REPORT_THRESHOLD=12
+LAYER2_MEAS_RNTP_REPORT_MAX_NOMINAL_EPRE=20
+LAYER2_MEAS_PERIODICITY=25
+
+/*************** bitmask info UL PowerMask ****************
+bit 0 ---->powerMask Cell Center user
+bit 1 ---->powerMask Cell Edge user
+bit 2 ---->powerMask QCIDelta[MaxQCI]
+************************************************/
+
+UL_POWER_MASK_CELL_CENTER_USER=2
+UL_POWER_MASK_CELL_EDGE_USER=3
+UL_POWER_MASK_QCI_DELTA[9]=[1,2,3,4,5,6,7,8,9,7]
+

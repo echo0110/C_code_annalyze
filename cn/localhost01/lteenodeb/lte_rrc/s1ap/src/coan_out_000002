@@ -1,0 +1,21 @@
+/*******************************************************************************
+*
+*  FILE NAME   : s1ap_logger.c
+*
+*  DESCRIPTION : This file contains the definitions of function used for logging
+*                and tracing.
+*
+*  Copyright 2007, Aricent Inc.
+*
+*******************************************************************************/
+
+#include "s1ap_logger.h"
+
+#include "cspl.h"
+#include "stacklayer.h"
+
+
+/*
+*   Global variables
+*/
+

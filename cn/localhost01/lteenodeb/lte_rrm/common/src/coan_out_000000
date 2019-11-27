@@ -1,0 +1,37 @@
+/* vim: ts=4:et:ai:ci:sw=4:
+*/
+/******************************************************************************
+ *
+ * ARICENT -
+ *
+ * Copyright (C) 2012 Aricent Inc . All Rights Reserved.
+ *
+ *******************************************************************************
+ *
+ * $$Id: rrm_common_utils.c $
+ *
+ *******************************************************************************
+ *
+ * File Description:
+ *       This is the main file of the bridge module. This module provides
+ *       the bridge between RRM layer and external libraries (CSPL, logger etc).
+ *
+ *******************************************************************************
+ *Revision Details
+ *----------------------
+ *   DATE            AUTHOR      REFERENCE       REASON
+ *   3 Apr,2012      ---------   Initial
+ *
+ ******************************************************************************/
+
+#include <cspl.h>
+#include <stacklayer.h>
+#include "rrm_utils.h"
+#include "rrm_mem_utils.h"
+#include "rrm_event_defines.h"
+#include "rrm_l2_intf.h"
+#include "rrc_ext_api.h"
+#include "x2ap_api.h"
+#include "s1ap_api.h"
+#include <pthread.h>
+#include <sys/time.h>

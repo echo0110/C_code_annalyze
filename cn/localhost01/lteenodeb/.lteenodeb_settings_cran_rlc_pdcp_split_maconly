@@ -1,0 +1,65 @@
+export LTE_ROOT=`pwd`
+export LTE_AR=ar rv
+export LTE_RANLIB=ranlib
+export HOST_COMPILATION=1
+export GTPU_SPLIT=1
+export SET_PDCP_GTPU_SPLIT_FLAG=1
+export RLC_PDCP_SPLIT_FLAG=1
+export DPDK_ENABLED=0
+export ASTRI_FLEXRAN=0
+
+export WORK_DIR=$LTE_ROOT/../..
+export LINUX_PC_TEST=true
+export PROJ_MODE=debug
+
+export LTE_LOG_DIR=$WORK_DIR/LTE_IPR/lteenodeb/common/lib
+export TEST_INC_DIR=$WORK_DIR/TEST/Frame
+export TEST_LIB_DIR=$WORK_DIR/TEST/lib
+
+
+if [ $DPDK_ENABLED == 1 ]; then
+
+export INTELDPDK=1
+export RTE_SDK=/root/dpdk-stable-17.11.1/
+export DPDK2_1=1
+export DPDK16_07=1
+
+    echo "DPDK environment is set"
+
+fi
+
+if [ $ASTRI_FLEXRAN == 1 ]; then
+
+    echo "ASTRI FLEXRAN is set"
+
+fi
+
+
+BIT=$(getconf LONG_BIT)
+ARCH=$(uname -m)
+
+if [ "$BIT" == "32" ]; then
+    export LTE_CC=gcc 
+    export LTE_MAKE_BIN=gcc 
+    export LTE_LD='ld -r'  
+    export BIT_64_SYSTEM=0
+elif [ "$BIT" == "64" ]; then
+# SPR 20430 Changes Start #
+    export LTE_CC=gcc
+    export LTE_MAKE_BIN=gcc
+    export LTE_LD='ld -r' 
+    export BIT_64_SYSTEM=1
+# SPR 20430 Changes End #
+else
+          echo "Machine is neither 32 bit nor 64 bit"
+fi
+
+echo "KNOWN_ARCH variable changed to $ARCH in simulators/protocolSimulatorTool/flags.mk"
+
+sed -i "s/UDL_DATA_SEPARATION/DDL_DATA_SEPARATION/g" make.inc
+sed -i "s/UCRAN_RLC_PDCP_SPLIT/DCRAN_RLC_PDCP_SPLIT/g" make.inc
+sed -i "s/DKPI_STATS/UKPI_STATS/g" make.inc
+sed -i "s/DPERF_STATS/UPERF_STATS/g" make.inc
+sed -i "s/DPDCP_GTPU_INTF/UPDCP_GTPU_INTF/g" $LTE_ROOT/make.inc
+sed -i "s/UPCTEST_MACONLY/DPCTEST_MACONLY/g" $LTE_ROOT/make.inc
+

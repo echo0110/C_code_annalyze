@@ -1,0 +1,59 @@
+/******************************************************************************
+*
+*   FILE NAME:
+*       rrc_common_utils.h
+*
+*   DESCRIPTION:
+*       This is the header file of the bridge module. This module provides
+*       the bridge between RRC layer and external libraries (CSPL, logger etc).
+*
+*   DATE            AUTHOR      REFERENCE       REASON
+*   31 Mar 2009     VasylN      ---------       Initial
+*
+*   Copyright (c) 2009, Aricent Inc. All Rights Reserved
+*
+******************************************************************************/
+
+#ifndef _RRC_COMMON_UTILS_H_
+#define _RRC_COMMON_UTILS_H_
+
+#include "rrc_defines.h"
+#include "rrc_protocol_events.h"
+
+/* SPR 1643 Start */
+#include "rrc_asn_enc_dec.h"
+/* SPR 1643 Stop */
+#include "rrc_porting.h"
+void set_cell_index(U8 cell_index);
+void set_ue_index(U16 ue_index);
+U8   get_cell_index(void);
+U16  get_ue_index(void);
+/*SPR 17777+-*/
+void set_cell_and_ue_index(U8 cell_index, U16 ue_index);
+#define GET_CELL_INDEX()      get_cell_index()
+#define GET_UE_INDEX()        get_ue_index()
+#define SET_CELL_INDEX(value) set_cell_index(value)
+#define SET_UE_INDEX(value)   set_ue_index(value)
+#define SET_CELL_AND_UE_INDEX(cell_index, ue_index) set_cell_and_ue_index(cell_index, ue_index)
+
+extern U32 length_read_g;
+/* Trace Procedure Code */
+
+#define NORMAL 10 
+
+/* SPR 1643 Start */
+#define MAX_NUM_OCTETS             3
+
+/* MCC/MNC Range Check (0-9) */
+#define MAX_VAL     0x9
+
+#define IS_VALID_MCC_MNC_DIGIT(x)    ((x) <= MAX_VAL)
+/* SPR 1643 Stop */
+
+/*
+*   logging
+*/
+
+#define RRC_INTERNAL_LOGGER 1
+#define RRC_ADV_LOGGER      2
+

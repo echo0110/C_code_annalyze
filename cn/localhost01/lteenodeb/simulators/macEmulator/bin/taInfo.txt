@@ -1,0 +1,15 @@
+##########################################################################
+#  Valid Values : ##########################################################################
+#  <rnti> - rnti for which TA value to be sent 
+#  Minimum TA Value >= 1
+#  Maximum TA Value <= 31
+# < value to be sent once or always > - value 1 means TA will be included in
+#                                      each UL data API
+#                                      vslue 0 means TA will be included only
+#                                      once in UL data API
+##########################################################################
+# <rnti>     <timingAdvanceValue> < value to be sent once or always >
+  61          20                     1
+  #11          21                     1
+  #12          22                     1
+  #13          23                     1

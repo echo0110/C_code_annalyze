@@ -1,0 +1,432 @@
+
+/******************************************************************************
+ *
+ *  ARICENT -
+ *
+ *  Copyright (C) 2009 Aricent Inc. All Rights Reserved.
+ *
+ ******************************************************************************
+ *
+ *  $Id: s1ap_oam.c,v 1.8 2010/10/13 07:04:24 gur18569 Exp $
+ *
+ ******************************************************************************
+ *
+ *  File Description : This file contains the definitions of functions handling
+ *                     OAM requests.
+ *
+ ******************************************************************************
+ *
+ * Revision Details
+ * ----------------
+ * $Log: s1ap_oam.c,v $
+ * Revision 1.8  2010/10/13 07:04:24  gur18569
+ * Merge from LTE_L3_Rel_2_0_2 tag tag
+ *
+ * Revision 1.7.4.5  2010/10/04 13:31:54  gur04518
+ * removed backslash
+ *
+ * Revision 1.7.4.4  2010/09/10 06:40:59  gur22047
+ * after mem_free doing ho_ctx NULL
+ *
+ * Revision 1.7.4.3  2010/09/09 10:11:05  gur22047
+ * modified_during_s1ap_UT added_stream_id
+ *
+ * Revision 1.7.4.2  2010/08/16 12:10:31  gur22047
+ * lokesh_review_incorporate
+ *
+ * Revision 1.7.4.1  2010/06/24 12:58:52  gur22047
+ * internal source and s1ap code
+ *
+ * Revision 1.7  2010/05/14 09:36:58  gur19827
+ * checklist,warning_removal,dst mod id,tdd,phy cell id added
+ *
+ * Revision 1.6  2010/04/06 04:03:50  gur18569
+ * reset fwk chg
+ *
+ * Revision 1.5  2010/03/24 09:50:45  gur18569
+ * Merged files from Rel 1.0 support branch
+ *
+ * Revision 1.4  2010/03/04 07:15:19  gur21006
+ * code comments incorporated
+ *
+ * Revision 1.3  2010/02/18 04:25:20  gur10248
+ * LTE_RRC_Rel1.1_18feb
+ *
+ * Revision 1.2  2010/01/04 16:10:05  ukr15916
+ * no message
+ *
+ * Revision 1.1.2.12  2009/12/28 10:14:35  gur21006
+ * system calls removed
+ *
+ * Revision 1.1.2.11  2009/12/28 05:09:42  gur18569
+ * fixed indentation
+ *
+ * Revision 1.1.2.10  2009/12/27 08:39:04  gur18569
+ * removed tabs
+ *
+ * Revision 1.1.2.9  2009/12/26 12:05:01  gur21006
+ * Warnings removed
+ *
+ * Revision 1.1.2.8  2009/12/23 07:01:35  gur21006
+ * Warnings Removed
+ *
+ * Revision 1.1.2.7  2009/12/23 06:34:14  gur21006
+ * Warnings Removed
+ *
+ * Revision 1.1.2.6  2009/12/22 14:37:00  gur18569
+ * fixed 154
+ *
+ * Revision 1.1.2.5  2009/12/17 15:09:23  gur18569
+ * setting num_of_prov_mme when parsing prov req from OAM
+ *
+ * Revision 1.1.2.4  2009/12/03 10:53:43  gur21006
+ * handling cleanup even before receiving prov req from oam
+ *
+ * Revision 1.1.2.3  2009/12/03 10:11:36  gur18569
+ * integration changes
+ *
+ * Revision 1.1.2.2  2009/11/26 18:33:49  ukr16018
+ * Merge S1AP and RRC (from branch dev_rel_1_0).
+ *
+ * Revision 1.1.2.1  2009/11/25 13:11:05  gur18569
+ * Shifted to level of rrc dir
+ *
+ * Revision 1.1.2.27  2009/11/24 12:21:13  gur20470
+ * Added Error tracein clean up function
+ *
+ * Revision 1.1.2.26  2009/11/23 15:08:53  gur18569
+ * removed commented code
+ *
+ * Revision 1.1.2.25  2009/11/23 15:07:59  gur18569
+ * ut fixes
+ *
+ * Revision 1.1.2.24  2009/11/23 13:52:52  gur20470
+ * Added code to stop timers in s1ap global context
+ *
+ * Revision 1.1.2.23  2009/11/23 10:54:31  gur21006
+ * rrc_stop_timer added in oam cleanup
+ *
+ * Revision 1.1.2.21  2009/11/23 09:25:30  gur21006
+ * Oam cleanup function : Reset active mme count added
+ *
+ * Revision 1.1.2.20  2009/11/23 08:11:11  gur20470
+ * Included is_initialised_once flag to check the initialisation of s1ap once
+ *
+ * Revision 1.1.2.19  2009/11/23 07:23:58  gur20470
+ * Included NULL check for pointer to mme context
+ *
+ * Revision 1.1.2.18  2009/11/22 12:05:43  gur18569
+ * freeing deleted nodes from search tree
+ *
+ * Revision 1.1.2.17  2009/11/22 11:48:17  gur18569
+ * ut fixes
+ *
+ * Revision 1.1.2.16  2009/11/21 10:49:26  gur20470
+ * Fixed logical error in s1ap_process_oam_cleanup_req
+ *
+ * Revision 1.1.2.15  2009/11/21 06:38:27  gur21006
+ * Error check added
+ *
+ * Revision 1.1.2.14  2009/11/20 09:53:48  gur18569
+ * setting s1ap state to wait for prov req after cleanup
+ *
+ * Revision 1.1.2.13  2009/11/20 08:43:09  gur18569
+ * bug fixes during UT
+ *
+ * Revision 1.1.2.12  2009/11/18 11:55:27  gur21006
+ * Review Comments incorporated
+ *
+ * Revision 1.1.2.11  2009/11/17 13:26:08  gur20470
+ * Incorporated review comments
+ *
+ * Revision 1.1.2.10  2009/11/17 04:28:31  gur20470
+ * Function s1ap_process_oam_provision_req modified
+ *
+ * Revision 1.1.2.9  2009/11/11 04:39:16  gur18569
+ * using max_retry_for_reset in place of DEFAULT_MAX_RESET_RETRY_COUNT and also setting values in global context during handling provision request
+ *
+ * Revision 1.1.2.8  2009/11/10 11:41:55  gur18569
+ * review comments incorporated
+ *
+ * Revision 1.1.2.7  2009/11/09 09:18:23  gur18569
+ * removed compilation warnings
+ *
+ * Revision 1.1.2.6  2009/11/08 11:24:00  gur20470
+ * removed compilation warnings
+ *
+ * Revision 1.1.2.5  2009/10/29 05:36:47  gur18569
+ * added stats case in process oam messages and removed commented code
+ *
+ * Revision 1.1.2.4  2009/10/28 07:19:16  gur18569
+ * added cause in reset req asn compose
+ *
+ * Revision 1.1.2.3  2009/10/26 09:15:34  gur21006
+ * Formatting Done
+ *
+ * Revision 1.1.2.2  2009/10/23 18:27:44  gur20052
+ * Remove Compilation errors
+ *
+ * Revision 1.1.2.1  2009/10/23 16:10:17  gur18569
+ * Initial version
+ *
+ *
+ *****************************************************************************/
+
+
+/******************************************************************************
+ * Standard Library Includes
+ *****************************************************************************/
+
+
+
+/******************************************************************************
+ * Project Includes
+ *****************************************************************************/
+#include "s1ap_oam.h"
+#include "list_wrap.h"
+#include "s1ap_mme_fsm.h"
+#include "s1ap_enb_config_fsm.h"
+#include "rrc_s1apCommon_intf.h"
+#include "rrc_common_md.h"
+#include "s1ap_utils.h"
+#include "rrc_logging.h"
+#include "s1ap_uecc.h"
+/*sctp parameters start */
+#ifdef ARICENT_SCTP_IPR
+#include "s_mibtyp.h"
+#include "s_stats.h"
+#include "s_mibdef.h"
+#endif
+/*sctp parameters stop */
+
+/*Lockless Implementation start*/
+#ifndef LOCKLESS_IMPL
+QLOCK s1ap_lock;
+#endif
+/*Lockless Implementation stop*/
+
+ /******************************************************************************
+   Private Definitions
+  *****************************************************************************/
+
+
+
+ /******************************************************************************
+   Private Types
+  *****************************************************************************/
+
+ /*****************************************************************************
+  * Private Function Prototypes
+  ****************************************************************************/
+static void s1ap_set_mme_reset_info(
+        s1ap_gb_context_t    *p_s1ap_gb_ctx,
+        reset_req_t    ** p_mme_reset_info_arr,
+        s1ap_enb_reset_info_t    *p_reset_input_info,
+        U8* p_num_reset_msgs_sent);
+
+S32
+compare_mmeUeS1apId_search_tree(
+        const void * p_elem1,
+        const void * p_elem2);
+
+const void *
+key_of_mmeUeS1apId_search_tree(
+        const YTNODE * p_node);
+
+static void  establish_sctp_associations(
+        s1ap_gb_context_t * p_s1ap_gb_ctx,
+        s1apInfo_t * p_s1_setup_info_req);
+
+static rrc_return_et update_oam_mme_connection_status_resp(
+        s1ap_oam_mme_conn_status_response_t *p_oam_mme_connection_status_resp,
+        rrc_response_et response,
+        U8 mme_id,
+        U8 index_to_update);
+
+static rrc_bool_et validate_s1ap_oam_ip_addresses(
+        s1apInfo_t *p_s1ap_oam_info
+        );
+
+/* SPR 1643 Start */
+static rrc_bool_et validate_s1ap_oam_plmn_identity(
+         s1_setup_req_t  *p_s1_setup_req_parameters);
+/* SPR 1643 Stop */
+
+rrc_bool_et validate_dynamic_s1ap_oam_ip_addresses(
+        s1ap_add_mme_req_t *p_s1ap_add_mme_info
+        );
+
+void  establish_dynamic_sctp_associations(
+        s1ap_gb_context_t * p_s1ap_gb_ctx,
+        s1ap_add_mme_req_t* p_s1ap_add_mme_info);
+
+void s1ap_oam_process_add_mme_req(
+        void *p_api,
+        s1ap_gb_context_t *p_s1ap_gb_ctx);
+
+void s1ap_process_oam_set_log_level_req(
+                 void                   *p_api,
+                 s1ap_gb_context_t *p_s1ap_gb_ctx);
+
+void s1ap_process_oam_get_log_level_req(
+                 void                   *p_api,
+                 s1ap_gb_context_t *p_s1ap_gb_ctx);
+
+void s1ap_process_oam_log_enable_req(
+                 void                   *p_api,
+                 s1ap_gb_context_t *p_s1ap_gb_ctx);
+
+U8 get_oam_log_level_from_s1ap_log_level
+(
+    U8 s1ap_log_level
+    );
+
+/*sctp parameters start*/
+#ifdef ARICENT_SCTP_IPR
+void s1ap_oam_convert_sctp_mib_status(
+       sctpmib_assoc_state_et *p_assoc_state,
+      U32 *p_s1ap_oam_sctp_status);
+#endif
+/*sctp parameters stop*/
+void s1ap_oam_process_proc_req(
+        void *p_api,
+        s1ap_gb_context_t *p_s1ap_gb_ctx);
+
+U32 s1ap_sctp_gl_health_monitor_timer_val = 0;
+
+ /******************************************************************************
+  * Private Constants
+  *****************************************************************************/
+
+ /******************************************************************************
+  * Exported Variables
+  *****************************************************************************/
+
+/*Bug 9305 start*/
+extern U32 s1ap_health_monitor_val[S1AP_SCTP_MAX_THREADS];
+/*Bug 9305 end*/
+extern s1ap_health_monitor_desriptors_t s1ap_health_monitor_desriptors[S1AP_SCTP_MAX_THREADS];
+
+
+ /*****************************************************************************
+  * Private Variables (Must be declared static)
+  *****************************************************************************/
+
+ /*****************************************************************************
+  * Function Name  : s1ap_process_oam_messages
+  * Inputs         : p_api - Pointer to input API buffer
+  *                  p_s1ap_gb_ctx - Pointer to S1AP global context.
+  * Outputs        : None
+  * Returns        : None
+  * Description    : This function is invoked to handle OAM messages to S1AP.
+  ******************************************************************************/
+ void s1ap_process_oam_messages(
+         /* Pointer to input API buffer */
+         void            *p_api,         
+
+         /* Pointer to the S1AP global context data */
+         s1ap_gb_context_t    *p_s1ap_gb_ctx)
+{
+    RRC_S1AP_UT_TRACE_ENTER();
+
+    RRC_ASSERT(PNULL != p_api);
+    RRC_ASSERT(PNULL != p_s1ap_gb_ctx);
+
+    switch (rrc_get_api_id((U8*)p_api))
+    {
+        case S1AP_OAM_PROVISION_REQ:
+            s1ap_process_oam_provision_req(p_api, p_s1ap_gb_ctx);
+            break;
+
+        case S1AP_OAM_RESET_REQ:
+            s1ap_process_oam_reset_req(p_api, p_s1ap_gb_ctx);
+            break;
+
+        case S1AP_OAM_CLEANUP_REQ:
+            s1ap_process_oam_cleanup_req(p_api,p_s1ap_gb_ctx);
+            break;
+
+/* CSR 00058587 Fix Start */
+        case S1AP_OAM_STATUS_REQ:
+/* CSR 00058587 Fix Start */
+            s1ap_oam_process_stats_req(p_api,p_s1ap_gb_ctx);
+            break;
+
+        case S1AP_OAM_ENB_CONFIG_UPDATE:
+            s1ap_oam_process_enb_config_update(p_api, p_s1ap_gb_ctx);
+            break;
+
+        case S1AP_OAM_CLOSE_MME_CONN:
+            s1ap_oam_process_close_mme_conn(p_api, p_s1ap_gb_ctx);
+            break;
+
+        case S1AP_OAM_REESTAB_MME_CONN: 
+            s1ap_oam_process_reestab_mme_conn(p_api, p_s1ap_gb_ctx);
+            break;
+        case S1AP_ADD_MME_REQ:
+            s1ap_oam_process_add_mme_req(p_api, p_s1ap_gb_ctx);
+            break;
+        case S1AP_OAM_GET_SCTP_STATUS_REQ:
+            s1ap_oam_process_get_sctp_status_req(p_api, p_s1ap_gb_ctx);
+            break;
+        case S1AP_OAM_PROC_SUPP_REQ:
+            s1ap_oam_process_proc_req(p_api,p_s1ap_gb_ctx);
+            break;
+        case S1AP_OAM_SET_LOG_LEVEL_REQ:
+            s1ap_process_oam_set_log_level_req(p_api, p_s1ap_gb_ctx);
+            break;
+        case S1AP_OAM_GET_LOG_LEVEL_REQ:
+            s1ap_process_oam_get_log_level_req(p_api, p_s1ap_gb_ctx);
+            break;
+        case S1AP_OAM_LOG_ENABLE_REQ:
+            s1ap_process_oam_log_enable_req(p_api, p_s1ap_gb_ctx);
+            break;
+
+        default:
+            RRC_S1AP_TRACE(RRC_WARNING,
+             "s1ap_process_oam_messages: "
+             "unexpected API from OAM module received");
+            break;
+    }
+
+    RRC_S1AP_UT_TRACE_EXIT();
+}
+
+/******************************************************************************
+ * *   FUNCTION NAME: s1ap_process_oam_set_log_level_req
+ * *   INPUTS       : void                  *p_api
+ * *                  s1ap_gb_context_t     *p_s1ap_gb_context.
+ * *   OUTPUTS      :
+ * *   DESCRIPTION:
+ * *       This function handles S1AP_OAM_SET_LOG_LEVEL_REQ msg
+ * *
+ * *   RETURNS:
+ * *       None
+ * ******************************************************************************/
+void s1ap_process_oam_set_log_level_req(
+        void                   *p_api,
+        s1ap_gb_context_t      *p_s1ap_gb_context)
+{
+    s1ap_oam_set_log_level_req_t    in_message;
+    s1ap_oam_set_log_level_resp_t   out_message;
+    S32 length_read    = RRC_NULL;
+    U16 transaction_id = RRC_NULL;
+
+    RRC_S1AP_UT_TRACE_ENTER();
+
+    RRC_ASSERT(PNULL != p_api);
+    RRC_ASSERT(PNULL != p_s1ap_gb_context);
+
+    memset_wrapper(&out_message, 0, sizeof(out_message));
+   if(RRC_SUCCESS !=  rrc_il_parse_s1ap_oam_set_log_level_req(
+                       &in_message,(U8*)p_api + RRC_FULL_INTERFACE_HEADERS_SIZE,
+                       rrc_get_api_buf_size(p_api) - RRC_FULL_INTERFACE_HEADERS_SIZE,
+                        &length_read))
+   {
+       RRC_S1AP_TRACE(S1AP_WARNING, "Bad message - ignore.");
+       RRC_S1AP_UT_TRACE_EXIT();
+       return;
+   }
+
+   transaction_id = rrc_get_transaction_id(p_api);
+

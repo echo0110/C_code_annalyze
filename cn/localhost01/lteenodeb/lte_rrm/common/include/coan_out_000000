@@ -1,0 +1,736 @@
+/*! \file rrm_utils.h
+ *  \brief This file contains the enums, struct, constants definitions for RRM APPS.
+ *  \date January 20, 2012
+ *  \author gur21481
+  */
+/*!
+
+*  \copyright {Copyright (c) 2009, Aricent Inc. All Rights Reserved}
+
+*/
+
+
+#ifndef _RRM_UTILS_H_
+#define _RRM_UTILS_H_
+/*
+* Header File Includes
+*/
+
+/*! \headerfile cspl.h <>
+ */
+#include <cspl.h>
+
+/*! \headerfile stacklayer.h <>
+ */
+#include <stacklayer.h>
+
+/*! \headerfile string.h <>
+ */
+#include <string.h>
+
+/*! \headerfile mqueue.h <>
+ */
+#include    <mqueue.h>
+ 
+/*! \headerfile math.h <>
+ */
+#include    <math.h>
+/*! \headerfile tgmath.h <>
+ */
+#include    <tgmath.h>
+/*! \headerfile sys/timeb.h <>
+ */
+#include <sys/timeb.h>
+/*! \headerfile rrm_defines.h <>
+ */
+#include <rrm_defines.h>
+
+/*! \headerfile lteLogger.h <>
+ */
+#include <lteLogger.h>
+
+/*! \headerfile rrm_oam_defines.h <>
+ */
+#include <rrm_oam_defines.h>
+/*! \headerfile sched.h <>
+ */
+
+#include <sched.h>
+#ifndef OAM_IPR
+#include "rrm_l2_intf.h"
+#endif
+
+/* Carrier Aggregation start*/
+#include "rrm_cell_rrmim_intf.h"
+/* Carrier Aggregation end */
+
+
+void set_cell_and_ue_index(U8 cell_index, U16 ue_index);
+void set_cell_index(U8 cell_index);
+void set_ue_index(U16 ue_index);
+U8   get_cell_index(void);
+U16  get_ue_index(void);
+
+/* SPR 20636 Changes Start */
+#ifdef __x86_64__
+#define U32_U32Long_Bit U32Long
+#else
+#define U32_U32Long_Bit U32
+#endif
+/* SPR 20636 Changes End */
+
+#define GET_CELL_INDEX()      get_cell_index()
+#define GET_UE_INDEX()        get_ue_index()
+#define SET_CELL_INDEX(value) set_cell_index(value)
+#define SET_UE_INDEX(value)   set_ue_index(value)
+#define SET_CELL_AND_UE_INDEX(cell_index, ue_index) set_cell_and_ue_index(cell_index, ue_index)
+
+void rrm_abort(void);
+/*! \fn rrm_void_t rrm_msg_mem_get(size_t size)
+ *  \brief It returns memory buffer from memory pool.
+ *  \param size     Size of buffer which will be allocated
+ */
+
+rrm_void_t *
+rrm_msg_mem_get
+(
+    size_t size    
+);
+
+/*SPR 15436 start*/
+void
+rrm_quick_sort
+(
+	void *p_base,
+	size_t num,
+	size_t size,
+	int (*p_comp_func)(const void *,const void *)
+);
+/*SPR 15436 End*/
+/* Platform-dependent defines */
+/*! \def RRM_MEMSET
+*/
+#define RRM_MEMSET 					memset
+/* ! \def RRM_MEMCPY
+*/
+#define RRM_MEMCPY 					memcpy
+/* ! \def RRM_MEMCMP
+*/
+#define RRM_MEMCMP 					memcmp
+
+#define RRM_MEMMOVE 			    memmove
+/* ! \def RRM_STRNCMP(X,Y,Z)
+*/
+#define RRM_STRNCMP(X,Y,Z)    		strncmp((const char*)X,(const char*)Y,Z)
+/* ! \def RRM_STRCAT(X,Y)
+*/
+#define RRM_STRCAT(X,Y)       		strcat((char*)X,(char*)Y)
+/* ! \def RRM_STRNCAT(X,Y,Z)
+*/
+#define RRM_STRNCAT(X,Y,Z)    		strncat((char*)X,(const char*)Y,Z)
+/* ! \def RRM_STRTOK(X,Y)
+*/
+#define RRM_STRTOK(X,Y)       		strtok((char*)X,(const char*)Y)
+/* ! \def RRM_STRCPY(X,Y)
+*/
+#define RRM_STRCPY(X,Y)       		strcpy((char*)X,(const char*)Y)
+/* ! \def RRM_STRNCPY(X,Y,Z)
+*/
+#define RRM_STRNCPY(X,Y,Z)    		strncpy((char*)X,(const char*)Y,Z)
+/* ! \def RRM_STRLEN(X)
+*/
+#define RRM_STRLEN(X)         		strlen((const char*)X)
+/* ! \def RRM_STRFTIME(A,B,C,D)
+*/
+#define RRM_STRFTIME(A,B,C,D) 		strftime((char*)A,B,C,D)
+/* ! \def RRM_SPRINTF(X,Y,Z)
+*/
+#define RRM_SPRINTF(X,Y,Z)    		sprintf((char*)X,Y,Z)
+/* ! \def RRM_SNPRINTF(A,B,C,D)
+*/
+#define RRM_SNPRINTF(A,B,C,D) 		snprintf((char*)A,B,C,D)
+/* ! \def RRM_QVLOGVA(X,Y,Z)
+*/
+#define RRM_QVLOGVA(X,Y,Z)    		qvLogVa(X,(const char*)Y,Z)
+/* ! \def  RRM_PUTS(X)
+*/
+#define RRM_PUTS(X)           		puts((const char*)X)
+/* ! \def RRM_FOPEN(X,Y)
+*/
+#define RRM_FOPEN(X,Y)        		fopen((const char*)X,(const char*)Y)
+/* ! \def RRM_STRCMP(X,Y)
+*/
+#define RRM_STRCMP(X,Y)    			strcmp((char*)X,(char*)Y)
+/* Start Porting Activity */
+/* ! \def RRM_FPRINTF
+*/
+#define RRM_FPRINTF         		fprintf
+
+/* ! \def RRM_PRINTF
+*/
+#define RRM_PRINTF         		    printf
+
+/* ! \def RRM_FLOOR
+*/
+#define RRM_FLOOR         		    floor
+
+/* ! \def RRM_FLOORF
+*/
+#define RRM_FLOORF         		    floorf
+
+/* ! \def RRM_CEIL
+*/
+#define RRM_CEIL         		    ceil
+
+/* ! \def RRM_CEILF
+*/
+#define RRM_CEILF        		    ceilf
+
+/* ! \def RRM_POW
+*/
+#define RRM_POW         		    pow
+
+/* ! \def RRM_LOG10
+*/
+#define RRM_LOG10         		    log10
+
+/* ! \def RRM_GETTIMEOFDAY          
+*/
+#define RRM_GETTIMEOFDAY   		    gettimeofday
+
+/* ! \def RRM_FFLUSH          
+*/
+#define RRM_FFLUSH       		    fflush
+
+/* ! \def RRM_CPU_ZERO 
+*/
+#define RRM_CPU_ZERO     		    CPU_ZERO
+
+/* ! \def RRM_CPU_SET 
+*/
+#define RRM_CPU_SET     		    CPU_SET
+
+/* ! \def RRM_NTOHL                 
+*/
+#define RRM_NTOHL                   ntohl
+#define RRM_HTONL                   htonl
+
+/* ! \def RRM_NTOHS                 
+*/
+#define RRM_NTOHS                   ntohs
+
+/* ! \def RRM_MATH_LOG            
+*/
+#define RRM_MATH_LOG                log
+
+/* ! \def RRM_FGETS               
+*/
+#define RRM_FGETS                   fgets
+
+/* ! \def RRM_EXIT               
+*/
+#define RRM_EXIT                    exit
+
+/* ! \def RRM_VSNPRINTF
+*/
+#define RRM_VSNPRINTF         		vsnprintf
+
+/* ! \def RRM_VA_START
+*/
+#define RRM_VA_START         		va_start
+
+/* ! \def RRM_VA_END
+*/
+#define RRM_VA_END         		    va_end
+
+/* ! \def RRM_ATOI
+*/
+#define RRM_ATOI                    atoi
+
+/* ! \def RRM_FTIME
+*/
+#define RRM_FTIME                   ftime
+
+/* ! \def RRM_TIME
+*/
+#define RRM_TIME                    time
+
+/* ! \def RRM_LOCALTIME
+*/
+#define RRM_LOCALTIME               localtime
+
+/* ! \def RRM_SHMGET
+*/
+#define RRM_SHMGET                  shmget
+
+/* ! \def RRM_SCHED_SETAFFINITY
+*/
+#define RRM_SCHED_SETAFFINITY       sched_setaffinity
+/* End Porting Activity */
+
+/** Added Macros for MIF */
+#define RRM_MESSAGE_API_START       		6000
+#define RRM_OAM_INIT_IND            		(RRM_MESSAGE_API_START + 1)
+#define RRM_OAM_INIT_CNF            		(RRM_MESSAGE_API_START + 2)
+#define RRM_OAM_SHUTDOWN_REQ        		(RRM_MESSAGE_API_START + 3)
+#define RRM_OAM_LOG_ENABLE_DISABLE_REQ 		(RRM_MESSAGE_API_START + 4)
+#define RRM_OAM_LOG_ENABLE_DISABLE_RESP 	(RRM_MESSAGE_API_START + 5)
+#define RRM_OAM_SET_LOG_LEVEL_REQ   		(RRM_MESSAGE_API_START + 6)
+#define RRM_OAM_SET_LOG_LEVEL_RESP  		(RRM_MESSAGE_API_START + 7)
+#define RRM_OAM_CELL_CONFIG_REQ          	(RRM_MESSAGE_API_START + 8)
+#define RRM_OAM_CELL_CONFIG_RESP       		(RRM_MESSAGE_API_START + 9)
+#define RRM_OAM_CELL_RECONFIG_REQ   		(RRM_MESSAGE_API_START + 10)
+#define RRM_OAM_CELL_RECONFIG_RESP     		(RRM_MESSAGE_API_START + 11)
+#define RRM_OAM_CELL_DELETE_REQ     		(RRM_MESSAGE_API_START + 12)
+#define RRM_OAM_CELL_DELETE_RESP    		(RRM_MESSAGE_API_START + 13)
+#define RRM_OAM_GENERIC_RESP        		(RRM_MESSAGE_API_START + 14)
+#define RRM_OAM_INIT_CONFIG_REQ     		(RRM_MESSAGE_API_START + 15)
+#define RRM_OAM_INIT_CONFIG_RESP            (RRM_MESSAGE_API_START + 16)
+#define RRM_OAM_CELL_START_REQ              (RRM_MESSAGE_API_START + 17)
+#define RRM_OAM_CELL_STOP_REQ               (RRM_MESSAGE_API_START + 18)
+#define RRM_OAM_RESUME_SERVICE_REQ          (RRM_MESSAGE_API_START + 19)
+#define RRM_OAM_RESUME_SERVICE_RESP         (RRM_MESSAGE_API_START + 20)
+#define RRM_OAM_CELL_START_RESP                  (RRM_MESSAGE_API_START + 21)
+#define RRM_OAM_CELL_STOP_RESP                   (RRM_MESSAGE_API_START + 22)
+//#define RRM_OAM_CELL_DELETE_RESP                 (RRM_MESSAGE_API_START + 23)
+#define RRM_OAM_RAC_ENABLE_DISABLE_REQ      (RRM_MESSAGE_API_START + 24)
+#define RRM_OAM_RAC_ENABLE_DISABLE_RESP     (RRM_MESSAGE_API_START + 25)
+#define RRM_OAM_SHUTDOWN_RESP               (RRM_MESSAGE_API_START + 26)
+#define RRM_OAM_CELL_CONTEXT_PRINT_REQ      (RRM_MESSAGE_API_START + 27)
+/*STATIC ICCI START*/
+#define RRM_OAM_CARRIER_FREQ_AND_DL_TX_POWER_REQ    (RRM_MESSAGE_API_START + 28)
+#define RRM_OAM_CARRIER_FREQ_AND_DL_TX_POWER_RESP   (RRM_MESSAGE_API_START + 29)
+/*STATIC ICCI ENDS*/
+/*UE RELEASE FROM OAM STRAT*/
+#define RRM_OAM_UE_RELEASE_REQ       (RRM_MESSAGE_API_START + 30)
+/* Soft Lock APIs Start */
+#define RRM_OAM_CELL_BLOCK_REQ       (RRM_MESSAGE_API_START + 33)
+#define RRM_OAM_CELL_BLOCK_RESP      (RRM_MESSAGE_API_START + 34)
+#define RRM_OAM_CELL_UNBLOCK_CMD     (RRM_MESSAGE_API_START + 35)
+#define RRM_OAM_READY_FOR_CELL_BLOCK_IND (RRM_MESSAGE_API_START + 36)
+/* Soft Lock APIs End */
+
+#define RRM_OAM_CELL_ECN_CAPACITY_ENHANCE_REQ (RRM_MESSAGE_API_START + 37) 
+#define RRM_OAM_CELL_ECN_CAPACITY_ENHANCE_RESP (RRM_MESSAGE_API_START + 38)
+
+/*#define RRM_OAM_PROC_SUPERVISION_RESP   (RRM_MESSAGE_API_START + 39)*/
+/*UE RELEASE FROM OAM ENDS */
+
+#define RRM_OAM_CELL_UPDATE_REQ             (RRM_MESSAGE_API_START + 40)
+#define RRM_OAM_CELL_UPDATE_RESP            (RRM_MESSAGE_API_START + 41)
+#define RRM_OAM_GET_VER_ID_REQ              (RRM_MESSAGE_API_START + 42)
+#define RRM_OAM_GET_VER_ID_RESP             (RRM_MESSAGE_API_START + 43)
+/* Free API IDs : (RRM_MESSAGE_API_START + 44), (RRM_MESSAGE_API_START + 45) */
+/* Event Notification API */
+#define RRM_OAM_EVENT_NOTIFICATION          (RRM_MESSAGE_API_START + 46)
+/* Free API IDs : (RRM_MESSAGE_API_START + 47), (RRM_MESSAGE_API_START + 48) */
+#define RRM_OAM_LOAD_CONFIG_REQ             (RRM_MESSAGE_API_START + 49)
+#define RRM_OAM_LOAD_CONFIG_RESP            (RRM_MESSAGE_API_START + 50)
+#define RRM_OAM_LOAD_REPORT_IND             (RRM_MESSAGE_API_START + 51)
+#define RRM_OAM_EVENT_CONFIG_REQ            (RRM_MESSAGE_API_START + 52)
+#define RRM_OAM_EVENT_CONFIG_RESP           (RRM_MESSAGE_API_START + 53)
+#define RRM_PLATFORM_LOAD_IND                (RRM_MESSAGE_API_START + 55)
+#define RRM_OAM_CONFIG_KPI_REQ              (RRM_MESSAGE_API_START +56) 
+#define RRM_OAM_CONFIG_KPI_RESP             (RRM_MESSAGE_API_START +57) 
+#define RRM_OAM_GET_KPI_REQ                 (RRM_MESSAGE_API_START +58) 
+#define RRM_OAM_GET_KPI_RESP                (RRM_MESSAGE_API_START +59) 
+#define RRM_OAM_KPI_IND                     (RRM_MESSAGE_API_START +60) 
+/* health monitoring changes start*/
+#define RRM_OAM_CHK_HEALTH_REQ              (RRM_MESSAGE_API_START +61)
+#define RRM_OAM_CHK_HEALTH_RESP             (RRM_MESSAGE_API_START +62)
+/* health monitoring changes end */
+/* Carrier_Aggregation_Start */
+#define RRM_OAM_ENB_CONFIG_REQ              (RRM_MESSAGE_API_START +63)
+#define RRM_OAM_ENB_CONFIG_RESP             (RRM_MESSAGE_API_START +64)
+/* Carrier_Aggregation_End */
+/* SPR_13117_FIX_START */
+#define RRM_OAM_GET_LOG_LEVEL_REQ           (RRM_MESSAGE_API_START +65)
+#define RRM_OAM_GET_LOG_LEVEL_RESP          (RRM_MESSAGE_API_START +66)
+/* SPR_13117_FIX_END */
+/*spr 22474 start*/
+#define RRM_OAM_GET_DEBUG_INFO_REQ           (RRM_MESSAGE_API_START +67)
+#define RRM_OAM_GET_DEBUG_INFO_RESP          (RRM_MESSAGE_API_START +68)
+/*spr 22474 end*/
+
+
+#define RRM_MESSAGE_API_END                 (RRM_MESSAGE_API_START + 100)
+
+
+/* SPR_6490 FIX */
+#define RRM_VER_ID            		        "LTE_RRM_VER_2.1.1" 
+#define RRM_OAM_API_BASE            		RRM_MESSAGE_API_START
+#define RRM_OAM_MAX_API             		RRM_MESSAGE_API_END
+/********************************************************************
+ * RMIF APIs
+ *******************************************************************/
+#define RMIF_CELL_API_REQ_BASE       		500
+#define RMIF_CELL_API_RESP_BASE      		600
+#define RMIF_UE_API_REQ_BASE         		700
+#define RMIF_UE_API_RESP_BASE        		800
+#define RMCM_UEM_API_REQ_BASE         		900
+#define RMCM_UEM_API_RESP_BASE        		1000
+/* Carrier_Aggregation_Start */
+#define RMCM_CELL_API_REQ_BASE              1100
+#define RMCM_CELL_API_RESP_BASE             1200
+/* Carrier_Aggregation_End */
+
+/* UE MEAS CHANGES : STARTS */
+
+/*! \def RRM_MIN_TRANSACTION_ID
+ *  \brief Macro storing the value of minimum transaction Identifier
+    generated by RRM
+ */
+#define RRM_MIN_TRANSACTION_ID  0
+
+/*! \def RRM_MAX_TRANSACTION_ID
+ *  \brief Macro storing the value of maximum transaction Identifier
+    generated by RRM
+ */
+#define RRM_MAX_TRANSACTION_ID  0xFFFF
+#define RRM_ROUNDING_FACTOR     0.5
+
+#define RRM_SHIFT_SEVEN_BYTES    56
+#define RRM_SHIFT_SIX_BYTES      48
+#define RRM_SHIFT_FIVE_BYTES     40
+#define RRM_SHIFT_FOUR_BYTES     32
+#define RRM_SHIFT_THREE_BYTES    24
+#define RRM_SHIFT_TWO_BYTES      16 
+#define RRM_SHIFT_ONE_BYTE        8
+#define RRM_SHIFT_ONE_NIBBLE      4  
+
+/*! \def SPID_FOR_CDMA
+ *  \valid range for spid for cdma  0 < spid_for_cdma_val < 254
+ */
+#define RRM_MAX_SPID_FOR_CDMA    253
+#define RRM_MIN_SPID_FOR_CDMA      1
+ /* fix 866 start */
+#define RRM_MAX_S_MEAURE         97
+ /* fix 866 end */
+
+/* UE MEAS CHANGES : ENDS */
+/* SPR 18145 Fix Start */
+extern const S8* p_rrm_utils_facility_name;
+extern const S8* p_rrm_cellm_facility_name;
+extern const S8* p_rrm_mif_facility_name;
+extern const S8* p_rrm_uem_facility_name;
+extern const S8* p_rrm_event_facility_name;
+extern const S8* p_rrm_g_cellm_facility_name;
+/* SPR21623 Changes Start */
+extern const S8 * UE_FSM_STATE[];
+/* SPR21623 Changes end */
+/* SPR 18145 Fix End */
+
+/*! \enum rrm_cm_uem_message_req_e
+ *  \brief This enum contains rrm cm uem message request params
+ */
+typedef enum _rrm_cm_uem_message_req_e
+{
+     RRMUEM_CM_DELETE_ALL_UE_CONTEXT_REQ = RMCM_UEM_API_REQ_BASE,
+    /*SPR-695 Fix Starts*/
+     RRMUEM_CM_DELETE_LOW_PRIORITY_UE_REQ,
+    /*SPR-695 Fix Ends*/
+     /*  DYNAMIC ICIC CHANGES START  */
+     RRMUEM_CM_UPDATE_UE_INFO_REQ,
+     /*  DYNAMIC ICIC CHANGES END  */
+    /* eICIC_PHASE_1_2_CHANGES_START */
+     RRMUEM_CM_GET_AGGRESSOR_REQ,        /* rrmuem_cm_get_aggressor_req_t */ 
+    /* eICIC_PHASE_1_2_CHANGES_END */
+    /** eICIC_PHASE_1_2_CHANGES_START */
+     RRMUEM_CELLM_EICIC_PROVISION_RECONFIG_REQ,  /*rrmuem_cellm_eicic_provision_reconfig_req_t*/ 
+/*Bug 831 Changes start*/
+     RRMUEM_CELLM_EICIC_RESET_ABS_REQ
+/*Bug 831 Changes End*/
+    /** eICIC_PHASE_1_2_CHANGES_END */
+}rrm_cm_uem_message_req_e;
+/* ! \def enum rrm_mif_cellm_message_req_e
+ *   \brief This enum contains the rrm mif celm message request params
+*/
+typedef enum _rrm_mif_cellm_message_req_e
+{
+	RRMCM_RMIF_LOG_ENABLE_DISABLE_REQ = RMIF_CELL_API_REQ_BASE,
+	RRMCM_RMIF_SET_LOG_LEVEL_REQ,
+	RRMCM_RMIF_INIT_CONFIG_REQ,
+	RRMCM_RMIF_CELL_CONFIG_REQ,
+	RRMCM_RMIF_CELL_RECONFIG_REQ,
+	RRMCM_RMIF_CELL_DELETE_REQ,
+	RRMCM_RMIF_CELL_START_REQ,
+	RRMCM_RMIF_CELL_STOP_REQ,
+    RRMCM_RMIF_CELL_UPDATE_REQ,
+	RRMCM_RMIF_CELL_START_ADMISSION_REQ,
+	RRMCM_RMIF_CELL_STOP_ADMISSION_REQ,
+	RRMCM_RMIF_CELL_SET_ATTRIBUTE_FROM_ANR_REQ,
+	RRMCM_RMIF_CELL_SET_ATTRIBUTE_FROM_ES_REQ,
+	RRMCM_RMIF_CELL_REGISTER_FROM_ANR_REQ,
+	RRMCM_RMIF_CELL_REGISTER_FROM_ES_REQ,
+	RRMCM_RMIF_RAC_ENABLE_DISABLE_REQ,
+	RRMCM_RMIF_CELL_DEREGISTER_FROM_ANR_REQ,
+	RRMCM_RMIF_CELL_DEREGISTER_FROM_ES_REQ,
+	RRMCM_RMIF_NMM_PREPARE_REQ,
+	RRMCM_RMIF_NMM_COMPLETE_REQ,
+	RRMCM_RMIF_CELL_CONTEXT_PRINT_REQ,
+    RRMCM_RMIF_MEAS_CONFIG_FROM_ANR_REQ,
+    RRMCM_RMIF_UPDATED_NRT_INFO_FROM_ANR_REQ,
+    RRMCM_RMIF_TNL_DISCOVERY_FROM_ANR_REQ,
+    RRMCM_RMIF_CELL_ECN_CAPACITY_REQ,
+/* RRM_MAC_RECONF_SCHEDULER_CHANGES_START */
+    RRMCM_RMIF_MAC_RECONF_SCHEDULE_IND,
+/* RRM_MAC_RECONF_SCHEDULER_CHANGES_ENDS */
+    /* Code for MLB start */
+    RRMCM_RMIF_LOAD_CONFIG_REQ,
+    RRMCM_RMIF_LOAD_CONFIG_RESP,
+    RRMCM_RMIF_CELL_REGISTER_FROM_MLB_REQ,
+    RRMCM_RMIF_CELL_DEREGISTER_FROM_MLB_REQ,
+	RRMCM_RMIF_CELL_SET_ATTRIBUTE_FROM_MLB_REQ,
+    RRMCM_RMIF_CELL_REGISTER_FROM_MRO_REQ,
+    RRMCM_RMIF_CELL_DEREGISTER_FROM_MRO_REQ,
+    /* MRO changes start */
+    RRMCM_RMIF_CELL_SET_ATTRIBUTE_FROM_MRO_REQ,
+    /* MRO changes end */
+    RRMCM_RMIF_CELL_PLATFORM_IND,
+    /* Code for MLB end */
+    RRMCM_RMIF_TTT_UPDATE_IND_REQ,
+    RRMCM_RMIF_CONFIG_KPI_REQ,
+    RRMCM_RMIF_GET_KPI_REQ,
+    RRMCM_RMIF_CELL_STOP_ADMISSION_REQ_FOR_CELL_BLOCK,
+    RRMCM_RMIF_CELL_START_ADMISSION_REQ_FOR_CELL_UNBLOCK,
+    RRMCM_RMIF_MEAS_CONFIG_OBJ_REMOVE_REQ,
+    /* RACH_OPTIMIZATION_CHANGES_START */
+    RRMCM_RMIF_RACH_INFO_IND,
+    /* RACH_OPTIMIZATION_CHANGES_END */
+    /* Carrier_Aggregation_Start */
+    RRMCM_RMIF_ENB_CONFIG_REQ,
+    /* Carrier_Aggregation_End */
+
+    /* Spr 16142 Fix Start */
+    RRMCM_RMIF_ENB_CONFIG_UPDATE_IND,
+    /*SPR 15180 Fix Stop*/
+    RRMCM_RMIF_STOP_TNL_DISCOVERY_FROM_ANR_REQ
+    /* Spr 16142 Fix End */
+}rrm_mif_cellm_message_req_e;
+/* ! \def enum rrm_mif_cellm_message_resp_e
+*   \brief This enum contains the rrm mif cellm message response params
+*/
+typedef enum _rrm_mif_cellm_message_resp_e
+{
+ 	RRMCM_RMIF_LOG_ENABLE_DISABLE_RESP = RMIF_CELL_API_RESP_BASE,
+ 	RRMCM_RMIF_SET_LOG_LEVEL_RESP,
+ 	RRMCM_RMIF_INIT_CONFIG_RESP,
+ 	RRMCM_RMIF_CELL_CONFIG_RESP,   
+ 	RRMCM_RMIF_CELL_RECONFIG_RESP, 
+ 	RRMCM_RMIF_CELL_DELETE_RESP,   
+ 	RRMCM_RMIF_CELL_START_RESP,    
+ 	RRMCM_RMIF_CELL_STOP_RESP,   
+    RRMCM_RMIF_CELL_UPDATE_RESP,  
+ 	RRMCM_RMIF_CELL_START_ADMISSION_RESP,
+ 	RRMCM_RMIF_CELL_STOP_ADMISSION_RESP,
+ 	RRMCM_RMIF_CELL_SET_ATTRIBUTE_RESP,
+ 	RRMCM_RMIF_CELL_REGISTER_RESP,
+ 	RRMCM_RMIF_CELL_DEREGISTER_RESP,
+ 	RRMCM_RMIF_GENERIC_RESP,
+ 	RRMCM_RMIF_CELL_STATE_CHANGE_FOR_ANR_IND,
+ 	RRMCM_RMIF_CELL_ACTIVE_UE_COUNT_REPORT_FOR_ANR_IND,
+ 	RRMCM_RMIF_CELL_ACTIVE_THRESHOLD_REACHED_REPORT_FOR_ANR_IND,
+ 	RRMCM_RMIF_CELL_STATE_CHANGE_FOR_ES_IND,
+ 	RRMCM_RMIF_CELL_ACTIVE_UE_COUNT_REPORT_FOR_ES_IND,
+ 	RRMCM_RMIF_CELL_ACTIVE_THRESHOLD_REACHED_REPORT_FOR_ES_IND,
+	RRMCM_RMIF_RAC_ENABLE_DISABLE_RES,
+ 	RRMCM_RMIF_INIT_IND,
+ 	RRMCM_RMIF_NMM_PREPARE_RESP,
+ 	RRMCM_RMIF_NMM_COMPLETE_RESP,
+ 	RRMCM_RMIF_MEAS_CONFIG_RESP,
+ 	RRMCM_RMIF_UPDATED_NRT_INFO_FROM_ANR_RES,
+    RRMCM_RMIF_TNL_DISCOVERY_FROM_ANR_RES,
+    RRMCM_RMIF_CELL_ECN_CAPACITY_RESP,
+    /* MLB Changes start */
+    RRMCM_RMIF_CELL_STATE_CHANGE_FOR_MLB_IND,
+    /* MLB Changes end */
+    RRMCM_RMIF_CELL_STATE_CHANGE_FOR_MRO_IND,
+    RRMCM_RMIF_CONFIG_KPI_RESP,
+    RRMCM_RMIF_GET_KPI_RESP,
+    RRMCM_RMIF_KPI_IND,
+    RRMCM_RMIF_MEAS_CONFIG_OBJ_REMOVE_RESP,
+    /* RACH_OPTIMIZATION_CHANGES_START */
+    RRMCM_RMIF_RACH_L2_REPORT,
+    RRMCM_RMIF_CELL_STATE_CHANGE_FOR_RACH_OPTI,
+    /* RACH_OPTIMIZATION_CHANGES_END */
+    /* Carrier_Aggregation_Start */
+    RRMCM_RMIF_ENB_CONFIG_RESP
+    /* Carrier_Aggregation_End */
+}rrm_mif_cellm_message_resp_e;
+/* ! \def enum rrm_mif_uem_message_resp_e
+ *   \brief This enum contains the rrm mif uem message response params
+*/
+typedef enum _rrm_mif_uem_message_resp_e
+{
+    RRMUEM_RMIF_INIT_IND = RMIF_UE_API_RESP_BASE,
+    RRMUEM_RMIF_INIT_CONFIG_RES,
+    RRMUEM_RMIF_EMERGENCY_CALL_ACTIVE_RES,
+    RRMUEM_RMIF_SET_LOG_LEVEL_RES,
+    RRMUEM_RMIF_LOG_ENABLE_DISABLE_RES,
+    RRMUEM_RMIF_MEAS_CONFIG_RES,
+    RRMUEM_RMIF_SNR_REPORT,
+    RRMUEM_RMIF_MEAS_RESULTS_IND,
+    RRMUEM_RMIF_HO_REPORT,
+    RRMUEM_RMIF_NO_ACTIVE_UE_IND,
+    RRMUEM_RMIF_NON_EMRGNCY_ACTIVE_CALLS_HO_RESP,
+    RRMUEM_RMIF_EVENT_NOTIFICATION_IND,
+    /* MRO changes start */
+    RRMUEM_RMIF_HO_ATTEMPT_IND,
+    RRMUEM_RMIF_HO_FAILURE_REPORT,
+    /* MRO changes end */
+    RRMUEM_RMIF_EVENT_CONFIG_RESP,
+    /* RACH_OPTIMIZATION_CHANGES_START */
+    RRMUEM_RMIF_RACH_REPORT,
+    /* RACH_OPTIMIZATION_CHANGES_END */
+    /* SPR_13117_FIX_START */
+    RRMUEM_RMIF_GET_LOG_LEVEL_RESP
+    /* SPR_13117_FIX_END */
+
+}rrm_mif_uem_message_resp_e;
+
+/* ! \def rrm_mif_uem_message_req_e
+*   \brief This enum contains the rrm mif uem message request params
+*/
+typedef enum _rrm_mif_uem_message_req_e
+{
+    RRMUEM_RMIF_INIT_CONFIG_REQ = RMIF_UE_API_REQ_BASE,
+    RRMUEM_RMIF_EMERGENCY_CALL_ACTIVE_REQ,
+    RRMUEM_RMIF_SET_LOG_LEVEL_REQ,
+    RRMUEM_RMIF_LOG_ENABLE_DISABLE_REQ,
+    RRMUEM_RMIF_GET_SNR_REPORT,
+    RRMUEM_RMIF_UE_REL_REQ,
+    RRMUEM_RMIF_RELEASE_ALL_EXISTING_UE_FORCEFULLY_REQ,
+    RRMUEM_RMIF_NON_EMRGNCY_ACTIVE_CALLS_HO_REQ,
+    RRMUEM_RMIF_EVENT_CONFIG_REQ,
+    /* RACH_OPTIMIZATION_CHANGES_START */
+    RRMUEM_RMIF_RACH_INFO_IND,
+    /* RACH_OPTIMIZATION_CHANGES_END */
+    /* SPR_13117_FIX_START */
+    RRMUEM_RMIF_GET_LOG_LEVEL_REQ
+    /* SPR_13117_FIX_END */
+
+}rrm_mif_uem_message_req_e;
+
+/* ! \def rrm_cellm_uem_message_ind_e
+*   \brief This enum contains the rrm celm uem message index 
+*/
+typedef enum _rrm_cellm_uem_message_ind_e
+{
+    RRMUEM_CM_SET_UNSET_ECN_IND,
+    RRMUEM_CM_UNSET_ECN_FOR_ALL_UE_IND,
+    RRMUEM_CM_REDIRECT_REL_IND,
+    /* SPR 16406 Start */
+    RRMUEM_CM_PRB_THRESHOLD_REACHED_IND,
+    RRMUEM_CM_AWAITED_HO_TRIGGER_IND,
+	/* SPR 16406 End */
+    RRMUEM_CM_CELL_INFO_CHNANGE_IND,
+    RRMUEM_CM_SCELL_DEACT_ON_LOAD,
+    RRMUEM_CM_SCELL_DEACT_ON_CA_TO_NON_CA,
+    /* eICIC_PHASE_1_2_CHANGES_START */
+    RRMUEM_CM_SCHEDULE_VICTIM_UE_IND   /* rrmuem_cm_schedule_victim_ue_ind_t */
+    /* eICIC_PHASE_1_2_CHANGES_END */
+#ifdef LTE_EMBMS_SUPPORTED  
+    ,RRMUEM_CM_MBMS_RECONFIG_UE_IND   /* rrmuem_cm_mbms_reconfig_ue_ind_t */
+#endif
+}rrm_cellm_uem_message_ind_e;
+/* ! \def rrm_cm_uem_message_resp_e
+ *   \brief This enum contains rrm cm uem message response params
+*/
+typedef enum _rrm_cm_uem_message_resp_e
+{
+    RRMUEM_CM_DELETE_ALL_UE_CONTEXT_RESP = RMCM_UEM_API_RESP_BASE,
+    /*  DYNAMIC ICIC CHANGES START  */
+    RRMUEM_CM_UPDATE_UE_INFO_RESP, 
+    /*  DYNAMIC ICIC CHANGES END  */
+    /* CA_Stage3_Change: Start */
+    RRMUEM_CM_CELL_INFO_CHANGE_RESP,
+    /* CA_Stage3_Change: End */
+    /* BUG_11648_FIX_START */
+    RRMUEM_CM_CELL_STOP_RESP,
+    /* BUG_11648_FIX_END */
+    /* eICIC_PHASE_1_2_CHANGES_START */
+    RRMUEM_CM_GET_AGGRESSOR_RESP,         /* rrmuem_cm_get_aggressor_resp_t */
+    /* eICIC_PHASE_1_2_CHANGES_END */
+    /** eICIC_PHASE_1_2_CHANGES_START */
+    RRMUEM_CELLM_EICIC_PROVISION_RECONFIG_RESP /*rrmuem_cellm_eicic_provision_reconfig_resp_t*/
+    /** eICIC_PHASE_1_2_CHANGES_END */
+
+}rrm_cm_uem_message_resp_e;
+
+/* Carrier_Aggregation_Start */
+typedef enum _rrmcm_cell_message_req_e
+{
+    RRMCM_CELL_LOAD_ACTN_SCELL_DEACT_IND = RMCM_CELL_API_REQ_BASE,
+    RRM_CELL_LOAD_MULTICAST_INFO_IND,
+    RRM_CELL_CA_CONFIG_CHANGE_MULTICAST_INFO_IND,
+/* CA_Stage3_Change: Start */
+    RRM_CELL_CA_CONFIG_CHANGE_MULTICAST_INFO_IND_RESP
+/* CA_Stage3_Change: End */
+}rrmcm_cell_message_req_e;
+/* Carrier_Aggregation_End */
+
+typedef enum _rrm_mif_logger_message_ind_e
+{
+    RMIF_LOGGER_INIT_IND
+}rrm_mif_logger_message_ind_e;
+
+typedef struct _rrm_logger_ctxt_t
+{
+    U32 wait_interval;
+}rrm_logger_ctxt_t;
+
+typedef struct _rrm_logger_init_cfg
+{
+    U32 cpu_bitmap;
+    U16 wait_interval;
+}rrm_logger_init_cfg_t;
+/* ! \def RRMUEM_RMIF_SHUTDOWN_RESP
+*/
+
+#define RMIF_MAX_API RRMUEM_RMIF_SHUTDOWN_RESP
+/* ! \def RRMCM_RRMUEM_API_BASE
+*/
+#define RRMCM_RRMUEM_API_BASE                   0x300
+/* ! \def RRMCM_RRMUEM_MAX_API
+*/
+#define RRMCM_RRMUEM_MAX_API            		(RRMCM_RRMUEM_API_BASE + 100)
+/* Measurment Re-config END */
+
+/* Trace Procedure Code */
+/* ! \def NORMAL
+*/
+#define NORMAL 									10 
+
+#ifdef WIN32
+/* ! \def RRM_STRDUP
+*/
+#define RRM_STRDUP _strdup
+#else
+/* ! \def RRM_STRDUP(X)
+*/
+#define RRM_STRDUP(X) strdup((char*)X)
+#endif
+
+/*
+*   logging
+*/
+
+#define RRM										4
+#define RRM_MODULE_ID_ARR 3
+#ifdef RRM_ADV_LOGGER
+    #define LOGGER_TYPE RRM_ADV_LOGGER
+#endif
+
+#ifdef RRM_INTERNAL_LOGGER
+    #define LOGGER_TYPE RRM_INTERNAL_LOGGER
+#endif
+
+#ifdef RRM_IN_MEM_LOGGER
+    #define LOGGER_TYPE RRM_IN_MEM_LOGGER
+#endif
+#define RRM_LOG_LEVEL_NONE  QVLOG_NONE
+
+#define RRM_MIN_MODULE_ID_FOR_ADV_LOGGER 21
+/* SPR 21622 start */
+#define DEFAULT_LOG_FILE                "rrm_main.log"
+/* SPR 21622 end */

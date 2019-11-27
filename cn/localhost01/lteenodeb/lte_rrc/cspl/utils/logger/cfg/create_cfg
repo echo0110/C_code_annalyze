@@ -1,0 +1,7 @@
+echo "[MODULES]"  > $2
+cat $1 | awk '{ print $2,$1 }' >> $2
+echo "[/MODULES]" >> $2
+echo " " >> $2
+cat $1 | awk '{print "gen_api",$3,$1}' | bash  >> $2
+\rm -f api.c api.h a.out
+

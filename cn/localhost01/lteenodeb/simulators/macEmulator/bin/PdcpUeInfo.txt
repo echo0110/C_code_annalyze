@@ -1,0 +1,17 @@
+##########################################################################
+#  Valid Values : ##########################################################################
+#  LowerUser >= 10
+#  MaxUser   <= 310
+#  LowerLc   > 1
+#  MaxLc     <= 10
+#  Number of Lc >= (num_video_prof_per_ue + num_audio_prof_per_ue + num_data_prof_per_ue)
+#  Packet size > 0
+#  periodic   = 1 - peridic: 0 - bursty
+#  PacketInterval_vedio_prof = Any value multiples of 5 < 1000 
+#  PacketInterval_audio_prof = Any value multiples of 5 < 1000 
+#  PacketInterval_data_prof  = Any value multiples of 5 < 1000 
+#  Granularity is 5ms 
+#  FILENAME    = <any valid file name>  
+##########################################################################
+#<User> <Lc> <PacketSize> <Periodic> <Profile> <PacketInterval> <InitialDelay>
+    62   1     1000         1        1            10            0 

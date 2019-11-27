@@ -1,0 +1,55 @@
+#******************************************************************************
+#        	Makefile for all Generic Library Common components 
+#  
+#                
+#  
+# DATE        NAME            REFERENCE        REASON
+# ----------- --------------- ------------- -------------------------------
+#
+# 17/02/2005  Achint Mehta     SPR 7266        QNX Porting
+#
+# Copyright (c) 2005, Hughes Software System Ltd.
+#******************************************************************************
+
+GW_BASE		=	../../..
+INC_MK          =       $(GW_BASE)/build/make/qnx
+include			$(INC_MK)/makefile.mk
+
+INC_MK_GL       =       $(GW_BASE)/genlib/make
+include                 $(INC_MK_GL)/makegl.mk
+ 
+LIB_DIR         =       $(GW_BASE)$(GW_SLASH)lib$(GW_SLASH)qnx
+
+GL_OBJ_DIR_DOS_CMD =	..$(GW_SLASH)..$(GW_SLASH)obj
+
+INCLUDE         +=      -I$(CMN_BASE)$(GW_SLASH)h\
+			-I$(GL_CMN_DIR)$(GW_SLASH)h\
+			-I$(GW_CSPL_DIR)$(GW_SLASH)h\
+			-I$(GW_CSPL_DIR)$(GW_SLASH)ports$(GW_SLASH)linux
+
+CFLAGS_CMN      +=      -DGL_CSPL_PORT
+
+
+all:	clean gl_ulm gl_ulm_mt
+	
+
+clean:
+	$(RM) $(GL_CMN_OBJ_FILES)
+	$(RM) $(LIB_DIR)$(GW_SLASH)libgl_ulml.a
+	$(RM) $(LIB_DIR)$(GW_SLASH)libgl_ulm_mtl.a
+
+
+gl_ulm:
+	$(CC) $(COPTIONS) $(INCLUDE) $(CFLAGS_CMN) $(GL_CMN_SRC_FILES)
+
+	$(MV) *.$(OBJ_SUFFIX) $(GL_OBJ_DIR_DOS_CMD)
+	$(LIB) $(LIB_DIR)/libgl_ulml.a $(GL_CMN_OBJ_FILES)
+
+
+gl_ulm_mt:
+	$(CC) $(COPTIONS) $(INCLUDE) $(CFLAGS_CMN) -DGW_MT_ENABLED\
+	$(GL_CMN_SRC_FILES)
+
+	$(MV) *.$(OBJ_SUFFIX) $(GL_OBJ_DIR_DOS_CMD)
+	$(LIB) $(LIB_DIR)/libgl_ulm_mtl.a $(GL_CMN_OBJ_FILES)
+

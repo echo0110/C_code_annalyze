@@ -1,0 +1,46 @@
+/******************************************************************************
+ *
+ * ARICENT -
+ *
+ * Copyright (C) 2012 Aricent Inc . All Rights Reserved.
+ *
+ *******************************************************************************
+ *
+ * $$Id: rrm_main.c $
+ *
+ ******************************************************************************
+ *
+ * File Description: This file contains contains the main function function of 
+ *                   the RRM binary. It registers various RRM CSPL modules.
+ *        
+ *
+ *******************************************************************************
+ *Revision Details
+ *----------------------
+ *   DATE            AUTHOR      REFERENCE       REASON
+ *   3 Mar, 2012     ---------   Initial
+ *
+ ******************************************************************************/
+
+/**************************************************************************** 
+ *  Standard Library Includes : shall not be done 
+ ****************************************************************************/
+
+/****************************************************************************
+ * Project Includes
+ ****************************************************************************/
+#include <cspl.h>
+#include "rrm_defines.h"
+#include "rrm_utils.h"
+#include <pthread.h>
+
+#ifdef RRM_UT_FRAMEWORK
+#include "rrm_ut_stub_db.h"
+#else
+#define RRM_UT_STUB_THRD  RRM_ZERO
+#endif
+U8* p_config_file;
+
+rrm_l2_msgq_intf_data      *p_rrm_l2_msgq_intf_glb_data = RRM_PNULL;
+rrm_pdcp_msgq_intf_data    *p_rrm_pdcp_msgq_intf_glb_data = RRM_PNULL;
+

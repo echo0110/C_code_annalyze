@@ -1,0 +1,35 @@
+/******************************************************************************
+*
+*   FILE NAME:
+*       rrc_entity.c
+*
+*   DESCRIPTION:
+*       In this file RRC is composed from RRC CSPL modules
+*
+*   DATE            AUTHOR      REFERENCE       REASON
+*   03 April 2009   VasylS      ---------       Initial
+*
+*   Copyright (c) 2009, Aricent Inc. All Rights Reserved
+*
+******************************************************************************/
+#define _GNU_SOURCE
+
+#ifdef RRC_PROFILER
+#include <signal.h>
+extern void __gcov_flush(void);
+#endif
+#include <lteMisc.h>
+#include <cspl.h>
+#include <stacklayer.h>
+
+#include "simulation_environment.h"
+
+#include "rrc_common_utils.h"
+#include "rrc_handlers.h"
+#include "s1ap_handlers.h"
+#include "rrc_msg_mgmt.h"
+#include <sched.h>
+#include "pthread.h"
+#include "rrc_check.h"
+#include "rrc_validation.h"
+#include "rrc_logging.h"

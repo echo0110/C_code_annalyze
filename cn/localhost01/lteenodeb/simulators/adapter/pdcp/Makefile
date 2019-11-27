@@ -1,0 +1,87 @@
+#/****************************************************************************
+# *
+# *  ARICENT -
+# *
+# *  Copyright (c) Aricent.
+# *
+# ****************************************************************************
+# *
+# *
+# ****************************************************************************
+# *
+# *  File Description : Makefile
+# *
+# ****************************************************************************
+# *
+# * Revision Details
+# * ----------------
+# *
+# *
+# * Revision 1.1  2009/06/16 11:31:33  gur19836
+# * Initial Version
+# *
+# *
+# *
+# ****************************************************************************/
+##############################################################################
+#
+#		MAIN MAKE FILE						 
+#	Make file to be used for building PDCP_ADAPTER. 
+#						
+##############################################################################
+include ${LTE_ROOT}/make.inc
+PDCP_ADAPTER_EXEC_NAME = pdcpAdapter
+OBJS            = $(PDCP_ADAPTER_EXEC_NAME).o 
+PDCP_LIB_DIR    = ${LTE_ROOT}/pdcp/lib
+PDCP_INC         = ${LTE_ROOT}/pdcp/pdcpCore/include
+PDCP_COMMON_INC =${LTE_ROOT}/pdcp/pdcpCommon/include
+PDCP_COMMON_LIB =${LTE_ROOT}/pdcp/pdcpCommon/lib
+COMM_LIB_DIR    = ${LTE_ROOT}/common/lib
+PDCP_ADAPTER_INC         = ${LTE_ROOT}/simulators/adapter/pdcp/include
+PDCP_ADAPTER_LIB_DIR     = ${LTE_ROOT}/simulators/adapter/pdcp/lib
+
+INCLUDE_PATH    =  -I${LTE_ROOT}/distributer/include -I$(COMMON_ROOT)/include -I$(COMMON_ROOT)/include/lte_port \
+                  -I$(PDCP_INC) -I$(LTE_ROOT)/pdcp/securityEngine/include -I$(PDCP_COMMON_INC)  -I$(PDCP_ADAPTER_INC) -I$(LTE_ROOT)/commonInterface/interfaces/include -I$(LTE_ROOT)/gtpuPacketRelay/packetRelay/include -I $(EGTPU_ROOT)/stack/fsm/h/ -I $(EGTPU_ROOT)/shared/h/ -I $(EGTPU_ROOT)/stack/common/h\
+				    -I $(LTE_ROOT)/common/loggingFrameWork/logging/inc/ -I $(LTE_ROOT)/common/loggingFrameWork/alarm/inc/ -I $(LTE_ROOT)/common/loggingFrameWork/common/inc/ \
+					-I $(LTE_ROOT)/commonInterface/interfaces/include/
+#SPR 2030 Logging FrameWork Dependency
+
+
+SEARCH_PATH     = -L$(COMM_LIB_DIR) -L$(PDCP_LIB_DIR) -L$(PDCP_COMMON_LIB) -L$(PDCP_ADAPTER_LIB_DIR)
+
+PDCP_ADAPTER_HOME        = ${LTE_ROOT}/simulators/adapter/pdcp
+PDCP_ADAPTER_BIN_DIR     = ${PDCP_ADAPTER_HOME}/bin
+PDCP_ADAPTER_EXEC_PATH = $(PDCP_ADAPTER_BIN_DIR)
+PDCP_ADAPTER_SRC_DIR     = ${PDCP_ADAPTER_HOME}/src
+
+CTAGS = -DBUILD_EXE
+CFLAGS += $(FLAGS)
+PDCP_ADAPTER_LIB_FILES_C = $(PDCP_ADAPTER_SRC_DIR)/ltePdcpAdapter.c  
+PDCP_ADAPTER_LIB_FILES_O = $(PDCP_ADAPTER_LIB_DIR)/ltePdcpAdapter.o  
+
+PDCP_ADAPTER_ARCHIVE  = $(PDCP_ADAPTER_LIB_DIR)/libpdcpAdapter.a
+
+all :pdcpAdapterLib
+
+pdcpAdapterExe:
+	        cd ${PDCP_ADAPTER_BIN_DIR} && $(CC) -g -c -Wall $(OPTIM_FLAGS)\
+${CTAGS} ${INCLUDE_PATH} -o pdcpAdapter.o $(PDCP_ADAPTER_SRC_DIR)/ltePdcpAdapter.c 
+		cd ${PDCP_ADAPTER_BIN_DIR} && $(CC) -g -Wall $(OPTIM_FLAGS)\
+$(SEARCH_PATH) pdcpAdapter.o -o pdcpAdapter -lpdcp -lintegrity -lrohc -lframework -lm -lrt
+
+pdcpAdapterLib:
+	cd ${PDCP_ADAPTER_LIB_DIR} && ${CC} $(CFLAGS) ${INCLUDE_PATH} ${PDCP_ADAPTER_LIB_FILES_C} 
+	    ${AR} -ur ${PDCP_ADAPTER_ARCHIVE}  ${PDCP_ADAPTER_LIB_FILES_O}
+
+
+clean:
+	${RM} $(PDCP_ADAPTER_BIN_DIR)/$(PDCP_ADAPTER_EXEC_NAME)
+	${RM} $(PDCP_ADAPTER_BIN_DIR)/$(PDCP_ADAPTER_EXEC_NAME).o
+	${RM} $(PDCP_ADAPTER_LIB_DIR)/ltePdcpAdapter.o
+	${RM} $(PDCP_ADAPTER_LIB_DIR)/libpdcpAdapter.a
+
+$(warning LTE_ROOT = $(LTE_ROOT))
+$(warning PDCP_ADAPTER_LIB_DIR = $(PDCP_ADAPTER_LIB_DIR))
+$(warning PDCP_ADAPTER_ARCHIVE = $(PDCP_ADAPTER_ARCHIVE))
+$(warning COMPILE = $(COMPILE))
+

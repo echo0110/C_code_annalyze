@@ -1,0 +1,33 @@
+RRH_SUPPORT=0
+OAM_SON_ENABLE=1
+OAM_UT_FRAMEWORK=0
+#NBIOT compilation changes
+ifeq '$(NBIOT_FEAT)' 'enable'
+export NBIOT=1
+else
+export NBIOT=0
+endif
+$(info $$NBNIOT is [${NBIOT}])
+
+INCLUDE_RRC=-I${LTE_ROOT}/lte_rrc/tools/advlogger/src/include
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/s1ap/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/xwap/include/
+INCLUDE_RRC+=-I${LTE_ROOT}/lte_rrc/rrc/common/include/
+INCLUDE_RRC+=-I${LTE_ROOT}/lte_rrc/rrc/common/include/single/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/common/rrmim/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/asn/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/x2ap/init/inc/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/runner/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/common/s1ap_wrap/include/
+
+
+CSPL_SRC = ${LTE_ROOT}/lte_rrc/cspl/src
+CSPL_BUILD = ${LTE_ROOT}/lte_rrc/cspl/build
+CSPL_INC = ${LTE_ROOT}/lte_rrc/cspl/h
+CSPL_POSIX = ${LTE_ROOT}/lte_rrc/cspl/ports/posix
+
+CSPL_FLAG =  -g -O3 -D_REENTRANT -D_MEM_DEBUG -DRRM_INTERNAL_LOGGER -pedantic -Wall -W -Wimplicit -Wreturn-type -Wunused -Wmissing-prototypes -Wswitch -Wcomment -Wchar-subscripts -Wcast-align -Waggregate-return -Wstrict-prototypes -Wmissing-declarations -Wno-format -Wuninitialized -Wno-unused -Wpointer-arith -c
+
+INCLUDE_CSPL  = -I${CSPL_INC}
+INCLUDE_CSPL += -I${CSPL_POSIX}
+

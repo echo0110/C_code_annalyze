@@ -1,0 +1,253 @@
+/****************************************************************************
+ *
+ *  ARICENT -
+ *
+ *  Copyright (C) 2011 Aricent Inc. All Rights Reserved.
+ *
+ ****************************************************************************
+ *
+ *  $Id: lteOamInterface.h $
+ *
+ ****************************************************************************
+ *
+ *  File Description : This file contains all the APIs used between L2 and OAM.
+ *
+ ****************************************************************************
+ *
+ ****************************************************************************/
+#ifndef INCLUDED_OAM_INTERFACE_H
+#define INCLUDED_OAM_INTERFACE_H
+
+#define MAC_MESSAGE_API_START          1
+
+/* MAC OAM API Ids */
+#define MAC_INIT_LAYER_REQ         (MAC_MESSAGE_API_START + 1)
+#define MAC_INIT_LAYER_CNF         (MAC_MESSAGE_API_START +2)
+#define MAC_CLEANUP_LAYER_REQ      (MAC_MESSAGE_API_START +3)
+#define MAC_CLEANUP_LAYER_CNF      (MAC_MESSAGE_API_START +4)
+#define MAC_SET_LOG_LEVEL_REQ      (MAC_MESSAGE_API_START + 7)
+#define MAC_SET_LOG_LEVEL_CNF      (MAC_MESSAGE_API_START + 8)
+#define MAC_GET_STATUS_REQ         (MAC_MESSAGE_API_START +9)
+#define MAC_GET_STATUS_CNF         (MAC_MESSAGE_API_START +10)
+#define MAC_RESET_STATS_REQ        (MAC_MESSAGE_API_START +11)
+#define MAC_RESET_STATS_CNF        (MAC_MESSAGE_API_START +12)
+
+#define MAC_GET_STATS_REQ          (MAC_MESSAGE_API_START +13)
+#define MAC_GET_STATS_CNF          (MAC_MESSAGE_API_START +14)
+#define MAC_ENABLE_DISABLE_LOG_REQ (MAC_MESSAGE_API_START +17 )
+#define MAC_GET_KPI_REQ            (MAC_MESSAGE_API_START +18)
+#define MAC_GET_KPI_CNF            (MAC_MESSAGE_API_START +19)
+
+#define MAC_GET_LOG_LEVEL_REQ      (MAC_MESSAGE_API_START + 20)
+#define MAC_GET_LOG_LEVEL_RESP     (MAC_MESSAGE_API_START + 21)
+#define MAC_ENABLE_LOG_CATEGORY_REQ  (MAC_MESSAGE_API_START + 22)
+#define MAC_DISABLE_LOG_CATEGORY_REQ  (MAC_MESSAGE_API_START + 23)
+#define MAC_GET_LOG_CATEGORY_REQ   (MAC_MESSAGE_API_START + 24)
+#define MAC_GET_LOG_CATEGORY_RESP  (MAC_MESSAGE_API_START + 25)
+#define MAC_INIT_LAYER_IND         (MAC_MESSAGE_API_START + 26)
+#define MAC_OAM_STARTPHY_IND       (MAC_MESSAGE_API_START + 27)
+#define MAC_STARTPHY_CNF           (MAC_MESSAGE_API_START + 28)
+#define MAC_MODIFY_LAYER_REQ       (MAC_MESSAGE_API_START + 30)
+#define MAC_MODIFY_LAYER_CNF       (MAC_MESSAGE_API_START + 31)
+#define MAC_CONFIGURE_KPI_STATS_REQ   (MAC_MESSAGE_API_START + 35)
+#define MAC_CONFIGURE_KPI_STATS_CNF   (MAC_MESSAGE_API_START + 36)
+#define MAC_KPI_STATS_IND             (MAC_MESSAGE_API_START + 37)
+#define MAC_GET_KPI_STATS_REQ         (MAC_MESSAGE_API_START + 38)
+#define MAC_GET_KPI_STATS_CNF         (MAC_MESSAGE_API_START + 39)
+
+/*CLPC_CHG*/
+#define MAC_RECONFIG_SCHEDULER_PARAMS (MAC_MESSAGE_API_START + 40)
+#define MAC_UE_SINR_TA_REQ (MAC_MESSAGE_API_START + 41)
+#define MAC_UE_SINR_TA_RESP (MAC_MESSAGE_API_START + 42)
+/*CLPC_CHG*/
+#define MAC_KPI_THP_STATS_IND         (MAC_MESSAGE_API_START + 43)
+#define MAC_GET_KPI_THP_STATS_CNF     (MAC_MESSAGE_API_START + 44)
+
+/* MAC PERF STATS API ids*/
+#define    MAC_CONFIGURE_PERF_STATS_REQ   (MAC_MESSAGE_API_START + 45)
+/* SPR 9680 changes start */
+#define    MAC_CONFIGURE_PERF_STATS_RESP  (MAC_MESSAGE_API_START + 46)
+/* SPR 9680 changes end */
+#define    MAC_CELL_PERF_STATS_IND        (MAC_MESSAGE_API_START + 47)
+#define    MAC_UE_PERF_STATS_IND          (MAC_MESSAGE_API_START + 48)
+#define    MAC_GET_PERF_STATS_REQ         (MAC_MESSAGE_API_START + 49)
+/* SPR 9680 changes start */
+#define    MAC_GET_CELL_PERF_STATS_RESP   (MAC_MESSAGE_API_START + 50)
+#define    MAC_GET_UE_PERF_STATS_RESP     (MAC_MESSAGE_API_START + 51)
+/* SPR 9680 changes end */
+#define    MAC_PROC_SUP_REQ               (MAC_MESSAGE_API_START + 52)
+#define    MAC_PROC_SUP_RESP              (MAC_MESSAGE_API_START + 53)
+#define    MAC_PHY_OAM_ERROR_IND          (MAC_MESSAGE_API_START + 54)
+/* CA changes start */
+#define    MAC_INIT_CELL_REQ              (MAC_MESSAGE_API_START + 55)
+#define    MAC_INIT_CELL_CNF              (MAC_MESSAGE_API_START + 56)
+/* CA changes end */
+/*spr 22474 start*/
+#define    OAM_MAC_GET_DEBUG_INFO_REQ     (MAC_MESSAGE_API_START + 57)
+#define    MAC_OAM_GET_DEBUG_INFO_RESP    (MAC_MESSAGE_API_START + 58)
+/*spr 22474 end*/
+
+#ifdef UTFWK_SIMULATION
+#define MAC_UTFWK_SIMULATION_API_START      MAC_MESSAGE_API_START + 100
+#define PERIODIC_TRAFFIC_REQ               (MAC_UTFWK_SIMULATION_API_START + 1)
+#define ONE_TICK_REQ                       (MAC_UTFWK_SIMULATION_API_START + 2)
+#define TA_PDU_REQ                         (MAC_UTFWK_SIMULATION_API_START + 3)
+#define ONE_DL_PDU_REQ                     (MAC_UTFWK_SIMULATION_API_START + 4)
+#define ONE_UL_PDU_REQ                     (MAC_UTFWK_SIMULATION_API_START + 5)
+#define DRX_PDU_REQ                        (MAC_UTFWK_SIMULATION_API_START + 6)
+#define MEAS_GAP_REQ                       (MAC_UTFWK_SIMULATION_API_START + 7)
+#define UL_SYNC_LOSS_REQ                   (MAC_UTFWK_SIMULATION_API_START + 8)
+#define SR_PDU_REQ                         (MAC_UTFWK_SIMULATION_API_START + 9)
+#define UL_GRANT_PUSCH_FAILURE_QUEUE_REQ   (MAC_UTFWK_SIMULATION_API_START + 10)
+#define UL_GRANT_PUSCH_PENDING_QUEUE_REQ   (MAC_UTFWK_SIMULATION_API_START + 11)
+#define CR_QUEUE_REQ                       (MAC_UTFWK_SIMULATION_API_START + 12)
+#define APERIODIC_CQI_QUEUE_REQ            (MAC_UTFWK_SIMULATION_API_START + 13)
+#endif
+
+#define MAC_MESSAGE_API_END        (MAC_MESSAGE_API_START   + 200)
+
+/* RLC OAM API Ids */
+#define  RLC_MESSAGE_API_START     MAC_MESSAGE_API_END
+#define  RLC_INIT_LAYER_REQ        (RLC_MESSAGE_API_START + 1)
+#define  RLC_INIT_LAYER_CNF        (RLC_MESSAGE_API_START + 2)
+
+#define  RLC_RESET_STATS_REQ       (RLC_MESSAGE_API_START + 3)
+#define  RLC_RESET_STATS_CNF       (RLC_MESSAGE_API_START + 4)
+#define  RLC_GET_STATS_REQ         (RLC_MESSAGE_API_START + 5)
+#define  RLC_GET_STATS_CNF         (RLC_MESSAGE_API_START + 6)
+#define  RLC_GET_STATUS_REQ        (RLC_MESSAGE_API_START + 7)
+#define  RLC_GET_STATUS_CNF        (RLC_MESSAGE_API_START + 8)
+#define  RLC_SET_LOG_LEVEL_REQ     (RLC_MESSAGE_API_START + 9)
+#define  RLC_SET_LOG_LEVEL_RESP    (RLC_MESSAGE_API_START + 10)
+#define  RLC_GET_LOG_LEVEL_REQ     (RLC_MESSAGE_API_START + 11)
+#define  RLC_GET_LOG_LEVEL_RESP    (RLC_MESSAGE_API_START + 12)
+#define  RLC_ENABLE_LOG_CATEGORY_REQ  (RLC_MESSAGE_API_START + 13)
+#define  RLC_DISABLE_LOG_CATEGORY_REQ (RLC_MESSAGE_API_START + 14)
+#define  RLC_GET_LOG_CATEGORY_REQ     (RLC_MESSAGE_API_START + 15)
+#define  RLC_GET_LOG_CATEGORY_RESP    (RLC_MESSAGE_API_START + 16)
+#define  RLC_CONFIGURE_PERF_STATS_REQ (RLC_MESSAGE_API_START + 17)
+#define  RLC_CONFIGURE_PERF_STATS_CNF (RLC_MESSAGE_API_START + 18)
+#define  RLC_UE_PERF_STATS_IND        (RLC_MESSAGE_API_START + 19)
+#define  RLC_GET_PERF_STATS_REQ       (RLC_MESSAGE_API_START + 20)
+#define  RLC_GET_UE_PERF_STATS_CNF    (RLC_MESSAGE_API_START + 21)
+#define  RLC_PACKET_DROP_REQ          (RLC_MESSAGE_API_START + 29)
+#define RLC_INIT_LAYER_IND            (RLC_MESSAGE_API_START + 30) 
+#define RLC_PROC_SUP_REQ              (RLC_MESSAGE_API_START + 31)
+#define RLC_PROC_SUP_RESP             (RLC_MESSAGE_API_START + 32)
+/*spr 22474 start*/
+#define  OAM_RLC_GET_DEBUG_INFO_REQ   (RLC_MESSAGE_API_START + 33)
+#define  RLC_OAM_GET_DEBUG_INFO_RESP  (RLC_MESSAGE_API_START + 34)
+/*spr 22474 end*/
+
+#define RLC_CLEANUP_LAYER_REQ   53
+#define RLC_CLEANUP_LAYER_CNF   54
+#define RLC_GET_BUILD_INFO_REQ  55
+#define RLC_GET_BUILD_INFO_CNF  56
+#define  RLC_MESSAGE_API_END          (RLC_MESSAGE_API_START   + 200)
+
+/* PDCP OAM API Ids */
+#define    PDCP_MESSAGE_API_START     RLC_MESSAGE_API_END
+#define    PDCP_INIT_LAYER_REQ        (PDCP_MESSAGE_API_START + 1)
+#define    PDCP_INIT_LAYER_CNF        (PDCP_MESSAGE_API_START + 2)
+#define    PDCP_CLEANUP_LAYER_REQ     (PDCP_MESSAGE_API_START + 3)
+#define    PDCP_CLEANUP_LAYER_CNF     (PDCP_MESSAGE_API_START + 4)
+#define    PDCP_GET_BUILD_INFO_REQ    (PDCP_MESSAGE_API_START + 5)
+#define    PDCP_GET_BUILD_INFO_CNF    (PDCP_MESSAGE_API_START + 6)
+#define    PDCP_RESET_STATS_REQ       (PDCP_MESSAGE_API_START + 7)
+#define    PDCP_RESET_STATS_CNF       (PDCP_MESSAGE_API_START + 8)
+#define    PDCP_GET_STATS_REQ         (PDCP_MESSAGE_API_START + 9)
+#define    PDCP_GET_STATS_RESP        (PDCP_MESSAGE_API_START + 10)
+#define    PDCP_GET_STATUS_REQ        (PDCP_MESSAGE_API_START + 11)
+#define    PDCP_GET_STATUS_RESP       (PDCP_MESSAGE_API_START + 12)
+#define    PDCP_SET_LOG_LEVEL_REQ     (PDCP_MESSAGE_API_START + 13)
+#define    PDCP_SET_LOG_LEVEL_RESP    (PDCP_MESSAGE_API_START + 14)
+#define    PDCP_GET_LOG_LEVEL_REQ     (PDCP_MESSAGE_API_START + 15)
+#define    PDCP_GET_LOG_LEVEL_RESP    (PDCP_MESSAGE_API_START + 16)
+#define    PDCP_ENABLE_LOG_CATEGORY_REQ (PDCP_MESSAGE_API_START + 17)
+#define    PDCP_DISABLE_LOG_CATEGORY_REQ (PDCP_MESSAGE_API_START + 18)
+#define    PDCP_GET_LOG_CATEGORY_REQ  (PDCP_MESSAGE_API_START + 19)
+#define    PDCP_GET_LOG_CATEGORY_RESP (PDCP_MESSAGE_API_START + 20)
+#define    PDCP_INIT_LAYER_IND        (PDCP_MESSAGE_API_START + 21) 
+#define    PDCP_NOTIFY_OAM_DEVICE_FAILURE (PDCP_MESSAGE_API_START + 22) 
+#define    PDCP_CONFIGURE_KPI_STATS_REQ   (PDCP_MESSAGE_API_START + 23)
+/* SPR 9680 changes start */
+#define    PDCP_CONFIGURE_KPI_STATS_RESP  (PDCP_MESSAGE_API_START + 24)
+/* SPR 9680 changes end */
+#define    PDCP_GET_KPI_STATS_REQ     (PDCP_MESSAGE_API_START + 25)
+#define    PDCP_KPI_STATS_IND         (PDCP_MESSAGE_API_START + 26)
+/* SPR 9680 changes start */
+#define    PDCP_GET_KPI_STATS_RESP    (PDCP_MESSAGE_API_START + 27)
+/* SPR 9680 changes end */
+#define    PDCP_KPI_THP_STATS_IND         (PDCP_MESSAGE_API_START + 28)
+/* SPR 9680 changes start */
+#define    PDCP_GET_KPI_THP_STATS_RESP    (PDCP_MESSAGE_API_START + 29)
+/* SPR 9680 changes end */
+#define    PDCP_CONFIGURE_PERF_STATS_REQ   (PDCP_MESSAGE_API_START + 30)
+#define    PDCP_CONFIGURE_PERF_STATS_CNF   (PDCP_MESSAGE_API_START + 31)
+#define    PDCP_CELL_PERF_STATS_IND        (PDCP_MESSAGE_API_START + 32)
+#define    PDCP_UE_PERF_STATS_IND          (PDCP_MESSAGE_API_START + 33)
+#define    PDCP_GET_PERF_STATS_REQ         (PDCP_MESSAGE_API_START + 34)
+#define    PDCP_GET_CELL_PERF_STATS_CNF    (PDCP_MESSAGE_API_START + 35)
+#define    PDCP_GET_UE_PERF_STATS_CNF      (PDCP_MESSAGE_API_START + 36)
+#define    PDCP_PROC_SUP_REQ               (PDCP_MESSAGE_API_START + 37)
+#define    PDCP_PROC_SUP_RESP              (PDCP_MESSAGE_API_START + 38) 
+/*spr 22474 start*/
+#define    OAM_PDCP_GET_DEBUG_INFO_REQ     (PDCP_MESSAGE_API_START + 39)
+#define    PDCP_OAM_GET_DEBUG_INFO_RESP    (PDCP_MESSAGE_API_START + 40)
+/*spr 22474 end*/
+
+#define PDCP_MESSAGE_API_END          (PDCP_MESSAGE_API_START + 200)
+
+/*************************************************************************/
+/*        GTPU LAYER MANAGEMENT APIS  (OAM and Packet Relay Interface)   */
+/*************************************************************************/
+#define RELAY_REQ_API_BASE                   400
+#define LM_INITDB_REQ                        RELAY_REQ_API_BASE + 0
+#define LM_SET_TIMER_REQ                     RELAY_REQ_API_BASE + 1
+#define LM_GET_TIMER_REQ                     RELAY_REQ_API_BASE + 2
+#define LM_GET_MAX_RETIRES_REQ               RELAY_REQ_API_BASE + 3
+#define LM_SET_MAX_RETIRES_REQ               RELAY_REQ_API_BASE + 4
+#define LM_INIT_TRACE_LEVEL_REQ              RELAY_REQ_API_BASE + 5
+#define LM_SET_TRACE_LEVEL_REQ               RELAY_REQ_API_BASE + 6
+#define LM_GET_TRACE_LEVEL_REQ               RELAY_REQ_API_BASE + 7
+/*spr 22474 start*/
+#define OAM_GTPU_GET_DEBUG_INFO_REQ         (RELAY_REQ_API_BASE + 8)
+#define GTPU_OAM_GET_DEBUG_INFO_RESP        (RELAY_REQ_API_BASE + 9)
+/*spr 22474 end*/
+#define LM_INITDB_CNF                        450 
+#define LM_SET_TIMER_CNF                     451
+#define LM_GET_TIMER_CNF                     452
+#define LM_GET_MAX_RETIRES_CNF               453
+#define LM_SET_MAX_RETIRES_CNF               454
+/* SPR 7085 fix start */
+#define LM_GET_STATS_CNF                     455
+#define LM_INIT_GET_STATS_CNF                456
+/* SPR 7085 fix end */
+#define LM_INIT_TRACE_LEVEL_CNF              457
+#define LM_SET_TRACE_LEVEL_CNF               458
+#define LM_GET_TRACE_LEVEL_CNF               459
+/*SPR 2030 fix Start*/
+#define PR_GTPU_SET_LOG_LEVEL_REQ            460
+#define PR_GTPU_GET_LOG_LEVEL_REQ            461
+#define PR_GTPU_ENABLE_LOG_CATEGORY_REQ      462
+#define PR_GTPU_DISABLE_LOG_CATEGORY_REQ     463
+#define PR_GTPU_GET_LOG_CATEGORY_REQ         464
+#define PR_GTPU_SET_LOG_LEVEL_RESP           465
+#define PR_GTPU_GET_LOG_LEVEL_RESP           466
+#define PR_GTPU_GET_LOG_CATEGORY_RESP        467
+#define PR_GTPU_PROC_SUP_REQ                 468
+#define PR_GTPU_PROC_SUP_RESP                469   
+/*SPR 2030 fix End*/
+/* SPR 7085 fix start */
+#define PR_GTPU_GET_STATS_REQ                470
+#define PR_GTPU_GET_STATS_RESP               471
+/*  SPR 13765 fix Start */
+#define PR_GTPU_ERROR_IND                    472
+/* SPR 13765 fix End */
+/*SPR 17585 +*/
+#define S1U_INIT_LAYER_IND                   473
+#define RELAY_MAX_LM_API                     S1U_INIT_LAYER_IND + 1 
+/*SPR 17585 -*/
+/* SPR 7085 fix end */
+
+#endif

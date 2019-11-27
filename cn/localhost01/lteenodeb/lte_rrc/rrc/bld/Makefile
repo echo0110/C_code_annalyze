@@ -1,0 +1,346 @@
+###################################################################
+# 
+#  FILE NAME   : Makefile 
+# 
+#  DESCRIPTION : The RRC make file 
+# 
+#  REVISION HISTORY : 
+# 
+#  DATE          Name        Reference        Comments 
+#  ----          ----        ---------        -------- 
+#
+#  Copyright (c) 2009, Aricent Inc. 
+# 
+###################################################################
+
+#Load make parameters
+include lterrc.mk
+#include sctp_mac.mk
+
+#Check build mode
+ifeq ($(filter $(MODE),$(RRC_KNOWN_MODE)),)
+  $(error Unknown mode '$(MODE)'. Known modes are: $(foreach m,$(RRC_KNOWN_MODE),'$m'))
+endif
+
+#Check logger type
+ifeq ($(filter $(LOGGER_TYPE),$(LOGGER_KNOWN_TYPE)),)
+  $(error Unknown logger type '$(LOGGER_TYPE)'. Known types are: $(foreach m,$(LOGGER_KNOWN_TYPE),'$m'))
+endif
+
+# NBIOT Changes - Start
+ifeq ($(filter $(NBIOT_FEAT),$(NBIOT_FEAT_KNOWN_TYPE)),)
+  $(error Invalid NBIOT_FEAT option '$(NBIOT_FEAT)'. Known types are: $(foreach m,$(NBIOT_FEAT_KNOWN_TYPE),'$m'))
+endif
+# NBIOT Changes - End
+
+# M2AP Changes - Start
+ifeq ($(filter $(EMBMS_FEAT),$(EMBMS_FEAT_KNOWN_TYPE)),)
+  $(error Invalid EMBMS_FEAT option '$(EMBMS_FEAT)'. Known types are: $(foreach m,$(EMBMS_FEAT_KNOWN_TYPE),'$m'))
+endif
+# M2AP Changes - End
+
+
+#Check Log and Alm Frwk integration
+ifeq ($(filter $(LOG_ALM_FRWK),$(LOG_ALM_FRWK_KNOWN_TYPE)),)
+    $(error Invalid LOG_ALM_FRWK option: '$(LOG_ALM_FRWK)'. Known types are: $(foreach m,$(LOG_ALM_FRWK_KNOWN_TYPE),'$m'))
+endif
+
+#Check Endian type
+ifeq ($(filter $(ENDIAN_TYPE),$(ENDIAN_KNOWN_TYPE)),)
+  $(error Unknown logger type '$(ENDIAN_TYPE)'. Known types are: $(foreach m,$(ENDIAN_KNOWN_TYPE),'$m'))
+endif
+#Select compiler options 
+RRC_DEFINES = $(RRC_DEFINES_$(MODE)) 
+
+#MENB_CHANGES_START  
+ifeq ($(filter $(ENDC_FEAT),$(ENDC_FEAT_KNOWN_TYPE)),)
+  $(error Invalid ENDC_FEAT option '$(ENDC_FEAT)'. Known types are: $(foreach m,$(ENDC_FEAT_KNOWN_TYPE),'$m'))
+endif
+
+ifeq '$(ENDC_FEAT)' 'enable' 
+    RRC_DEFINES += -DENDC_ENABLED
+endif
+#MENB_CHANGES_END
+
+RRC_CFLAGS = $(RRC_CFLAGS_$(MODE))
+###############################
+RRC_CFLAGS += $(CPPFLAGS) 
+RRC_CFLAGS += $(SCTP_FLAGS)
+
+###############################
+ifeq '$(ENDIAN_TYPE)' 'little'
+	RRC_DEFINES += -DLTE_L3_LITTLE_ENDIAN
+ endif
+ 
+ifeq '$(ENDIAN_TYPE)' 'big'
+	RRC_DEFINES += -DLTE_L3_BIG_ENDIAN
+endif
+#SPR 19713 change start
+#change for 19288 removed
+#SPR 19713 change end
+###############################
+ifeq '$(LOGGER_TYPE)' 'internal'
+	RRC_DEFINES += $(RRC_DEFINES_intlogger)
+endif
+
+ifeq '$(LOGGER_TYPE)' 'advanced'
+	RRC_DEFINES += $(RRC_DEFINES_advlogger)
+endif
+
+ifeq '$(RRC_UECC_FT)' '1'
+	RRC_DEFINES += -DRRC_UECC_DEBUG_FT
+	RRC_UECC_TR_ID_CONST = 1
+endif
+
+ifeq '$(RRC_UECC_TR_ID_CONST)' '1'
+	RRC_DEFINES += -DRRC_UECC_TR_ID_CONST 
+endif
+
+ifeq '$(RRC_CSC_FT)' '1'
+	RRC_DEFINES += -DRRC_CSC_DEBUG_FT
+endif
+
+#SPR 15521
+ifeq '$(LOG_ALM_FRWK)' 'enable'
+    RRC_DEFINES += -DALM_FRWK -DLAYER2_ALARM_REPORTING_ENABLED
+endif
+
+# NBIOT Changes - Start
+ifeq '$(NBIOT_FEAT)' 'enable'
+    RRC_DEFINES += -DIPR_NBIOT
+endif
+# NBIOT Changes - End
+
+RRC_DEFINES += -DHIGH_SCALABILITY_L3_MAX_UE
+# M2AP Changes - Start
+ifeq '$(EMBMS_FEAT)' 'enable'
+    RRC_DEFINES += -DLTE_EMBMS_SUPPORTED
+endif
+
+ifeq '$(LINUX_PC_TEST)' 'true'
+    RRC_DEFINES += -DLINUX_PC_TEST 
+	RRC_CFLAGS  += -fprofile-arcs -ftest-coverage
+endif
+
+
+# M2AP Changes - End
+#Set input variables
+RRC_OBJFILES:=
+RRC_INCLUDES = $(RRC_COMMON_INCLUDES)
+RRC_LIBS:=
+
+
+#Load make rules for each RRC module
+###################################################################
+#Rules for "advlogger" Target
+include lterrc_advlogger.mk
+
+#Rules for "s1apwrap" target
+include lterrc_s1apwrap.mk
+
+#Rules for "common" target
+include lterrc_common.mk 
+
+#Rules for "rrmim" target
+include lterrc_rrmim.mk 
+
+#Rules for "oamim" target
+include lterrc_oamim.mk 
+
+#Rules for "s1apim" target
+include lterrc_s1apim.mk 
+
+#Rules for "llim" target
+include lterrc_llim.mk
+
+#Rules for "asn" target
+include lterrc_asn.mk 
+
+#Rules for "csc" target
+include lterrc_csc.mk 
+
+#Rules for "oamh" target
+include lterrc_oamh.mk 
+
+#Rules for "uecc md" target
+include lterrc_ueccmd.mk 
+
+#Rules for "uecc" target
+include lterrc_uecc.mk 
+
+#Rules for "s1ap" target
+include lterrc_s1ap.mk
+
+#Rules for "s1ap_oamim" target
+include lterrc_s1apOamim.mk
+
+#Rules for "s1ap_rrmim" Target
+include lterrc_s1apRrmim.mk
+
+#Rules for "x2ap" Target
+include lterrc_x2ap.mk
+ifeq '$(EMBMS_FEAT)' 'enable'    
+# M2AP Changes - Start
+#Rules for "x2ap" Target
+include lterrc_m2ap.mk
+# M2AP Changes - End
+endif
+
+
+#The RRC libraries list
+ASN_LIBS=	-lbasn1per \
+			-lasn1rt
+
+#The RRC output files definitions
+###################################################################
+RRC_LIB:=	$(LIBDIR)/rrc.lib.o
+
+#Target definition
+######################################################################################
+#Default target
+ifeq '$(LOGGER_TYPE)' 'advanced'
+all: $(MODE) advlogger common rrmim oamim s1apim s1apRrmim llim asn csc oamh ueccmd uecc s1apOamim s1apwrap s1ap x2ap 
+# M2AP Changes - Start
+ifeq '$(EMBMS_FEAT)' 'enable'
+all: $(MODE) advlogger common rrmim oamim s1apim s1apRrmim llim asn csc oamh ueccmd uecc s1apOamim s1apwrap s1ap x2ap m2ap
+endif
+# M2AP Changes - End
+else
+all: $(MODE) common rrmim oamim s1apim s1apRrmim llim asn csc oamh ueccmd uecc s1apOamim s1apwrap s1ap x2ap 
+# M2AP Changes - Start
+ifeq '$(EMBMS_FEAT)' 'enable'
+all: $(MODE) common rrmim oamim s1apim s1apRrmim llim asn csc oamh ueccmd uecc s1apOamim s1apwrap s1ap x2ap m2ap
+endif
+# M2AP Changes - End
+endif
+	@echo  Linking $(RRC_LIB) ... 
+	$(RRC_LINKOBJ) -o $(RRC_LIB) $(RRC_OBJFILES) $(ASN_LIBS) 
+	@echo
+
+#X2AP Target definition
+######################################################################################
+x2ap:$(MODE) $(X2AP_LIB)
+
+clean_x2ap:
+	make -C $(RRC_ROOT)/../x2ap clean_x2ap \
+	    MODE=$(MODE) \
+	    RRC_PORT=$(RUNNER_PORT) \
+	    LOGGER_TYPE=$(LOGGER_TYPE) \
+        LOG_ALM_FRWK=$(LOG_ALM_FRWK) \
+	    RRC_UECC_TR_ID_CONST=$(RUNNER_RRC_UECC_TR_ID_CONST) \
+	    RRC_CSC_FT=$(RUNNER_RRC_CSC_FT) \
+        ENDC_FEAT=$(ENDC_FEAT) \
+	    SCTP_STACK=${SCTP_STACK}
+		
+.PHONY:$(X2AP_LIB)  
+$(X2AP_LIB):
+	@echo '[$(X2AP_LIB)]'
+	make -C $(RRC_ROOT)/../x2ap x2ap \
+	    MODE=$(MODE) \
+	    RRC_PORT=$(RUNNER_PORT) \
+	    LOGGER_TYPE=$(LOGGER_TYPE) \
+        LOG_ALM_FRWK=$(LOG_ALM_FRWK) \
+	    RRC_UECC_TR_ID_CONST=$(RUNNER_RRC_UECC_TR_ID_CONST) \
+	    RRC_CSC_FT=$(RUNNER_RRC_CSC_FT) \
+        ENDC_FEAT=$(ENDC_FEAT) \
+	    SCTP_STACK=${SCTP_STACK}
+	@echo
+ifeq '$(EMBMS_FEAT)' 'enable'    
+# M2AP Changes - Start
+#M2AP Target definition
+######################################################################################
+m2ap:$(MODE) $(M2AP_LIB)
+
+clean_m2ap:
+	make -C $(RRC_ROOT)/../m2ap clean_m2ap \
+	    MODE=$(MODE) \
+	    RRC_PORT=$(RUNNER_PORT) \
+	    LOGGER_TYPE=$(LOGGER_TYPE) \
+        LOG_ALM_FRWK=$(LOG_ALM_FRWK) \
+	    RRC_UECC_TR_ID_CONST=$(RUNNER_RRC_UECC_TR_ID_CONST) \
+	    RRC_CSC_FT=$(RUNNER_RRC_CSC_FT) \
+	    SCTP_STACK=${SCTP_STACK}
+
+$(M2AP_LIB):
+	@echo '[$(M2AP_LIB)]'
+	make -C $(RRC_ROOT)/../m2ap m2ap \
+	    MODE=$(MODE) \
+	    RRC_PORT=$(RUNNER_PORT) \
+	    LOGGER_TYPE=$(LOGGER_TYPE) \
+        LOG_ALM_FRWK=$(LOG_ALM_FRWK) \
+	    RRC_UECC_TR_ID_CONST=$(RUNNER_RRC_UECC_TR_ID_CONST) \
+	    RRC_CSC_FT=$(RUNNER_RRC_CSC_FT) \
+	    SCTP_STACK=${SCTP_STACK}
+	@echo
+    
+# M2AP Changes - End
+endif
+#Debug build
+debug: make_dirs print_build_info
+ 
+#Release build
+release: make_dirs print_build_info
+
+#Release with license build
+release_with_license: make_dirs print_build_info
+
+#Debug build with profiler supporting
+profiler: make_dirs print_build_info
+
+#Debug_with_license build
+debug_with_license: make_dirs print_build_info
+
+#Dependencies from make files
+$(RRC_OBJFILES) : Makefile lterrc.mk
+
+$(RRC_OBJFILES): ${OBJDIR}/%.o: %.c
+	@echo '${RRC_CC} $(INCLUDES) $(CPPFLAGS) ${RRC_DEFINES} $(RRC_INCLUDES) $(RRC_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $< '
+	${RRC_CC} $(INCLUDES) $(CPPFLAGS) ${RRC_DEFINES} $(RRC_INCLUDES) $(RRC_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $< 
+	@echo
+
+#Print buld inforamtion
+print_build_info:
+	@echo  Building with MODE=$(MODE) LOGGER_TYPE=$(LOGGER_TYPE) LOG_ALM_FRWK=$(LOG_ALM_FRWK) ENDC_FEAT=$(ENDC_FEAT)
+	
+#Make output folders
+make_dirs:
+	@echo  Creating target folders...MODE=$(MODE)
+	@mkdir -p -v $(OBJDIR)
+	@mkdir -p -v $(LIBDIR)
+
+# M2AP Changes - Start
+#Clean RRC related files
+ifeq '$(EMBMS_FEAT)' 'enable'    
+clean:  clean_m2ap clean_x2ap
+else
+clean: clean_x2ap
+endif
+	$(RRC_RM) -r $(RRC_ROOT)/bld/debug
+	$(RRC_RM) -r $(RRC_ROOT)/bld/debug_with_license
+	$(RRC_RM) -r $(RRC_ROOT)/bld/profiler
+	$(RRC_RM) -r $(RRC_ROOT)/bld/release
+	$(RRC_RM) -r $(RRC_ROOT)/bld/release_with_license
+	$(RRC_RM) -r $(RRC_ROOT)/bld/report
+	$(RRC_RM) -r $(RRC_ROOT)/bld/*.o
+# M2AP Changes - End
+
+#For Make file debugging purposes
+print_dbg:
+	@echo "$(RRC_ROOT)"
+	@echo "$(OBJDIR)"
+	@echo "$(LIBDIR)"
+	@echo $(RRC_COMMON_INCLUDES)  + LLIM=$(LLIM_INCLUDES)
+	@echo $(ASN_INCLUDES)
+	@echo $(ASN_SRCDIR)
+	@echo $(ASN_OBJFILES)
+	@echo $(LLIM_SRC_FILES)
+	@echo $(LLIM_OBJ)
+	@echo $(RRC_ROOT)
+	@echo $(VPATH)
+# 	@echo $(UECC_OBJFILES)
+	@echo $(LLIM_OBJFILES)
+	@echo $(ASN_OBJFILES)
+	@echo $(RRC_UECC_TR_ID_CONST)
+	@echo $(RRC_DEFINES)
+
+.PHONY : all debug release profiler debug_with_license release_with_license clean print_build_info

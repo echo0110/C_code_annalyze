@@ -1,0 +1,5 @@
+gcc -E -dD $1 > api.h
+export CFG_FILE=$2
+nawk -f parser.awk api.h
+gcc api.c
+a.out

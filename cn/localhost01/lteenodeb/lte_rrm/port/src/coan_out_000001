@@ -1,0 +1,111 @@
+/* vim: ts=4:et:ai:ci:sw=4
+*/
+/****************************************************************************
+ *
+ *  ARICENT -
+ *
+ *  Copyright (c) 2010 Aricent.
+ *
+ ****************************************************************************
+ * File Details
+ * ------------
+ *  $Id: rrm_shell.c,v 1.1.2.1.4.3 2010/10/15 13:45:24 gur20491 Exp $
+ ****************************************************************************
+ *
+ *  File Description : This file defines the encapsulating shell functions
+ *                     like socket open, close, receive & send data.
+ *
+ ****************************************************************************
+ *
+ * Revision Details
+ * ----------------
+ * $Log: rrm_shell.c,v $
+ * Revision 1.1.2.1.4.3  2010/10/15 13:45:24  gur20491
+ * Changes for RRC 2.0.1 Compliance
+ *
+ * Revision 1.1.2.2  2010/08/09 11:47:31  gur20491
+ * Adding log for Bind error
+ * Revision 1.2.0	gur29184, gur26515
+ *Adding S1AP interface
+ *
+ ****************************************************************************/
+
+
+/****************************************************************************
+ * Standard Library Includes
+ ****************************************************************************/
+#include    <stdio.h>
+#include    <stdlib.h>
+#include    <unistd.h>
+#include    <errno.h>
+#include    <string.h>
+#include    <fcntl.h>
+#include    "rrc_ext_api.h"
+#include    "x2ap_api.h"
+#include    "s1ap_api.h"
+#include    <mqueue.h>
+#include    <pthread.h>
+
+/****************************************************************************
+ * Project Includes
+ ****************************************************************************/
+#include    <cspl.h>
+#include    <stacklayer.h>
+#include    <shell.h>
+#include    "rrm_l2_intf.h"
+#include    "ltePdcpRRMInterface.h" 
+#include    "rrm_defines.h"
+#include    "rrm_utils.h"
+#include    "rrm_event_defines.h"
+/*SPR 20712 Start*/
+#include    "lteMessageQIntf.h"
+/*SPR 20712 End*/
+#define X2AP_RRM_IF_API_BASE                   900
+
+#define X2AP_RRM_LINK_DOWN_IND                 (X2AP_RRM_IF_API_BASE + 1)
+#define X2AP_RRM_LINK_UP_IND                   (X2AP_RRM_IF_API_BASE + 2)
+
+/*S_global variable used in RRM Shell*/
+S8                         *p_rrm_encaps_facility_name = (S8 *)"RRM_SHELL"; 
+/****************************************************************************
+  Private Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+  Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/*****************************************************************************
+ * Private Constants
+ ****************************************************************************/
+
+/****************************************************************************
+ * Exported Variables
+ ****************************************************************************/
+/* extern rrm_global_context_t     *p_rrm_glb_ctxt;*/
+
+
+/****************************************************************************
+ * Private Variables (Must be declared static)
+ ****************************************************************************/
+/* static const int  yes = 1, no = 0; Kshitij, Coverity CID 16310 and 16311 */
+static       fd_set rrm_fd_set;
+#ifdef RRM_UT_FRAMEWORK
+#include "rrm_ut_stub_db.h"
+static int gb_self_rrm_port;
+#endif
+extern U8* p_config_file;
+
+rrm_ext_communication_data comm_data;
+/*SPR 20908 Start*/
+rrm_oam_l2_comm_info_t l2_comm_data;
+/*SPR 20908 End*/
+
+#ifdef CRAN_RLC_PDCP_SPLIT
+rrm_oam_pdcp_comm_info_t pdcp_comm_data;
+#endif
+

@@ -1,0 +1,216 @@
+#/****************************************************************************
+# *
+# *  ARICENT -
+# *
+# *  Copyright (c) Aricent.
+# *
+# ****************************************************************************
+# *
+# *  $Id: Makefile.in ,v 1.0 2012/01/17 12:13:41 gur26210 Exp $
+# *
+# ****************************************************************************
+# *
+# *  File Description :RRM Enviornment Settings file
+# *
+# ****************************************************************************
+# *
+# * Revision Details
+# * ----------------
+# *
+# *
+# *
+# *
+# *
+# *
+# ****************************************************************************/
+# RRM_ADV_LOG_FLAG : 1 is advanced  logger
+# RRM_ADV_LOG_FLAG : 2 is internal  logger
+# RRM_ADV_LOG_FLAG : 3 is in memory logger
+
+export RRM_ADV_LOG_FLAG = 1
+# FLAG 0 means UT Enviornement is not present
+export RRM_UT_FLAG=0
+########################################################################
+# FLAG 0 means UT Framework is not present
+# FLAG 1 means UT Framework is present
+# Check that no space should be present after the digit
+########################################################################
+export RRM_UT_FRAMEWORK = 0
+# SPR 12537 Enhancement start
+########################################################################
+# FLAG 0 means disable L2 messages dumping in UDP socket
+# FLAG 1 means enable L2 messages dumping in UDP socket
+########################################################################
+GCOV_FLAG = 0
+########################################################################
+# FLAG 0 means disable coverage 
+# FLAG 1 means enable coverage
+########################################################################
+
+export RRM_L2_TRACE = 0
+# SPR 12537 Enhancement end 
+#NBIOT compilation changes
+ifeq '$(NBIOT_FEAT)' 'enable'
+export NBIOT=1
+else
+export NBIOT=0
+endif
+$(info $$NBNIOT is [${NBIOT}])
+INCLUDE_COMM = ${LTE_RRM}/common/include
+INCLUDE_LGR = ${LTE_ROOT}/common/in_memory_logging/include
+INCLUDE_INTF = ${LTE_RRM}/import/include
+INCLUDE_MULTISECTOR = ${LTE_RRM}/import/include/single
+INCLUDE_INTERFACE = ${LTE_RRM}/interface/include
+# SPR 20653 Fix Start #
+INCLUDE_PORT = $(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/common/include
+# SPR 20653 Fix End #
+INCLUDE_LLIF = ${LTE_RRM}/llif/include 
+INCLUDE_UEM = ${LTE_RRM}/core/ue_manager/include
+INCLUDE_CELLM = ${LTE_RRM}/core/cell_manager/include
+INCLUDE_SON = $(LTE_ROOT)/lte_son/interface/include
+ADVLOG_INC = $(LTE_ROOT)/lte_rrc/tools/advlogger/src
+MISC_INC = $(LTE_ROOT)/common/src
+########################################################################
+#Inclusion of Headers for UT stubs
+#Oam Stub
+#RRC Stub
+#MAC Stub
+#PDCP Stub
+########################################################################
+ifeq ($(RRM_UT_FRAMEWORK), 1)
+   INCLUDE_CUNIT=/usr/local/include/CUnit
+	# SPR 20653 Fix Start #
+
+   INCLUDE_OAM_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/oam_stub/include
+   INCLUDE_RRC_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/rrc_stub/include
+   INCLUDE_L2_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/l2_stub/include
+   INCLUDE_SON_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/son_stub/include
+   INCLUDE_COMM_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/common/include
+	# SPR 20653 Fix end #
+   INCLUDE_RRC_STUB_1=${LTE_RRM}/import/include/single/
+   
+endif
+SRC_COMM=${LTE_RRM}/common/src
+SRC_INTF=${LTE_RRM}/import/src
+SRC_MULTISECTOR=${LTE_RRM}/import/src/single
+SRC_PORT=${LTE_RRM}/port/src
+SRC_LLIF=${LTE_RRM}/llif/src
+ADVLOG_SRC = $(LTE_ROOT)/lte_rrc/tools/advlogger/src
+SRC_COM_PAR=$(LTE_ROOT)/lte_rrc/rrc/common/rrmim/src
+SRC_CP_COMM=$(LTE_ROOT)/lte_rrc/rrc/common/src
+MISC_SRC=$(LTE_ROOT)/common/src
+########################################################################
+#Source files path for UT stubs
+#Oam Stub
+#RRC Stub
+#MAC Stub
+#PDCP Stub
+########################################################################
+ifeq ($(RRM_UT_FRAMEWORK), 1)
+	# SPR 20653 Fix start #
+    SRC_OAM_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/oam_stub/src
+    SRC_RRC_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/rrc_stub/src
+    SRC_L2_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/l2_stub/src
+    SRC_SON_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/son_stub/src
+    SRC_COMM_STUB=$(LTE_ROOT)/../../TESTING/lte_rrm_ut_frwk/common/src
+	# SPR 20653 Fix end #
+endif
+INCLUDE_RRC=-I${LTE_ROOT}/lte_rrc/tools/advlogger/src/include 
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/s1ap/include/
+INCLUDE_RRC+=-I${LTE_ROOT}/lte_rrc/rrc/common/include/
+INCLUDE_RRC+=-I${LTE_ROOT}/lte_rrc/rrc/common/include/multi/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/common/rrmim/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/asn/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/x2ap/init/inc/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/common/s1ap_wrap/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/runner/include/
+
+ifeq ($(LINUX_PC_TEST), true)
+INCLUDE_RRC+=-I${TEST_INC_DIR}
+endif
+
+RRM_BUILD = ${LTE_RRM}/build
+OBJDIR = ${RRM_BUILD}/obj
+LIBDIR = ${RRM_BUILD}/lib
+RELEASE = ${RRM_BUILD}/release
+
+
+
+LIB_LOG = $(LTE_ROOT)/common/loggingFrameWork/lib
+LIB_ADLOG = $(LTE_ROOT)/lte_rrc/tools/advlogger/src/lib
+LIB_ALARM = $(LTE_ROOT)/common/loggingFrameWork/lib
+LIB_IN_MEM_LGR = $(LTE_ROOT)/common/lib
+
+
+CSPL_SRC = ${LTE_ROOT}/lte_rrc/cspl/src
+CSPL_BUILD = ${LTE_ROOT}/lte_rrc/cspl/build
+CSPL_INC = ${LTE_ROOT}/lte_rrc/cspl/h
+CSPL_POSIX = ${LTE_ROOT}/lte_rrc/cspl/ports/posix
+
+CSPL_FLAG =  -g -D_REENTRANT -D_MEM_DEBUG -DRRM_INTERNAL_LOGGER -pedantic -Wall -W -Wimplicit -Wreturn-type -Wunused -Wmissing-prototypes -Wswitch -Wcomment -Wchar-subscripts -Wcast-align -Waggregate-return -Wstrict-prototypes -Wmissing-declarations -Wno-format -Wuninitialized -Wno-unused -Wpointer-arith -c
+
+INCLUDE_CSPL  = -I${CSPL_INC}
+INCLUDE_CSPL += -I${CSPL_POSIX}
+
+
+ifeq ($(RRM_ADV_LOG_FLAG), 1)
+    RRM_FLAG = -DRRM_ADV_LOGGER=1 
+else
+ifeq ($(RRM_ADV_LOG_FLAG), 2)
+    RRM_FLAG = -DRRM_INTERNAL_LOGGER=2
+else
+ifeq ($(RRM_ADV_LOG_FLAG), 3)
+    RRM_FLAG = -DRRM_IN_MEM_LOGGER=3
+    RRM_FLAG += -DMODULE_LOGGING
+endif
+endif
+endif
+
+
+ifeq ($(RRM_UT_FLAG), 1)
+    RRM_FLAG += -DRRM_UT_FLAG 
+else
+    RRM_FLAG += -URRM_UT_FLAG
+endif
+
+ifeq ($(RRM_UT_FRAMEWORK), 1)
+    RRM_FLAG += -DRRM_UT_FRAMEWORK
+    RRM_FLAG += -UIPR_NBIOT 
+    
+    INCLUDE_RRC+=-I /usr/local/include/CUnit/
+#SPR 20078 RRM_TARGET_ENV flag removed 
+############################################
+# Define this flag for finding the memory leak 
+############################################
+    RRM_FLAG += -UCSPL_LEAK_DEBUG
+else
+    RRM_FLAG += -URRM_UT_FRAMEWORK
+endif
+
+#Enable for Coverity
+RRM_FLAG += -URRM_COV_RESRC_LEAK 
+
+CFLAGS += $(RRM_FLAG)
+               ## SPR 20430 Changes Start  ##
+#CFLAGS += -Werror
+               ## SPR 20430 Changes Start  ##
+############################################
+# Enable below commented lines for coverage
+# report
+############################################
+
+ifeq ($(GCOV_FLAG), 1)
+CFLAGS += -fprofile-arcs
+CFLAGS += -ftest-coverage
+CFLAGS += -lgcov
+endif
+
+# SPR 12537 Enhancement start 
+ifeq ($(RRM_L2_TRACE), 1)
+    RRM_FLAG += -DRRM_L2_TRACE
+else
+    RRM_FLAG += -URRM_L2_TRACE
+endif
+# SPR 12537 Enhancement end 
+
+

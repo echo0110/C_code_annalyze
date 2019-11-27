@@ -1,0 +1,68 @@
+ROOTDIR=$(CSPL_DIR)/build/
+include $(ROOTDIR)/cspl.mk
+
+target = cspl.lib.o 
+library = libcspl.a libmpset.a libcpset.a
+
+objects = \
+	es.o              \
+	run.o              \
+	manifest.o        \
+	cspl.o            \
+	cpool.o           \
+	stacklayer.o      \
+	ylib-bitmap.o     \
+	ylib-bufop.o      \
+	ylib-hash.o       \
+	ylib-pool.o       \
+	ylib-tree.o       \
+	ylib-bitstring.o  \
+	ylib-crc.o        \
+	ylib-list.o       \
+	ylib-squeue.o
+
+mpset_objects = mpoolset.o
+cpset_oblects = cpoolset.o
+
+default: $(target) $(library)
+	mv *.a $(CSPL_DIR)/build
+	mv *.o $(CSPL_DIR)/build
+
+$(target): $(objects) $(mpset_objects) $(cpset_oblects)
+	$(CSPL_LINKOBJ) -o $@ $(objects)  $(mpset_objects) $(cpset_oblects)
+
+$(library): $(objects) $(mpset_objects) $(cpset_oblects)
+	$(CSPL_AR) libcspl.a $(objects) 
+	$(CSPL_AR) libmpset.a $(mpset_objects) 
+	$(CSPL_AR) libcpset.a $(cpset_oblects) 
+	$(CSPL_RANLIB) libcspl.a
+	$(CSPL_RANLIB) libmpset.a
+	$(CSPL_RANLIB) libcpset.a
+
+$(objects):%.o: $(ROOTDIR)../src/%.c
+	$(CSPL_COMPILE) $(CSPL_FLAGS) -c $(CSPL_INCLUDES) -c $< -o $@
+
+$(mpset_objects):%.o: $(ROOTDIR)../src/%.c
+	$(CSPL_COMPILE) $(CSPL_FLAGS) -c $(CSPL_INCLUDES) -c $< -o $@
+
+$(cpset_oblects):%.o: $(ROOTDIR)../src/%.c
+	$(CSPL_COMPILE) $(CSPL_FLAGS) -c $(CSPL_INCLUDES) -c $< -o $@
+
+
+clean:
+	rm -rf $(objects) $(target) $(library) $(mpset_objects) $(cpset_oblects)
+	rm -rf *.a *.o
+
+configshow:
+	@echo 
+	@echo "Configuration"
+	@echo "    CSPL_COMPILE (Compiler) is:        $(CSPL_COMPILE)"
+	@echo "    CSPL_FLAGS (Flags) are:            $(CSPL_FLAGS)"
+	@echo "    CSPL_LINKOBJ (Partial Linker) is:  $(CSPL_LINKOBJ)"
+	@echo "    CSPL_LINKEXE (Final Linker) is:    $(CSPL_LINKEXE)"
+	@echo "    CSPL_LIBRARIES (Libraries) are:    $(CSPL_LIBRARIES)"
+	@echo "    CSPL_AR (Archiver) is:             $(CSPL_AR)"
+	@echo "    CSPL_RANLIB (Ranlib) is:           $(CSPL_RANLIB)"
+	@echo "Usage:"
+	@echo "    $(MAKE) [PORT=<port>] [DRIVER=<driver>] [CONFIG=<file>] <target>"
+	@echo

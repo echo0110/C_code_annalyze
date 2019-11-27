@@ -1,0 +1,316 @@
+/*******************************************************************************
+ *
+ *  FILE NAME   : x2ap_oam.c
+ *
+ *  DESCRIPTION : This file contains the oam message handlers.
+ *
+ *  DATE 24-June-2010  NAME Sudhanshu Kumar Srivastav
+ *                     REFERENCE  36.423_880(3GPP Spec) REASON
+ *
+ *  Copyright 2007, Aricent Inc.
+ *
+ *******************************************************************************/
+
+
+#include "commoninc.h"
+#include "x2ap_db.h"
+#include "rrc_x2apOam_intf.h"
+#include "x2ap_utils.h"
+#include "sctp_ipr.h"
+#include "x2ap_timer.h"
+#include "x2ap_api.h"
+#include "x2ap_cp_common.h"
+#include "x2setup_sm.h"
+#include "rrc_msg_mgmt.h"
+#include "rrc_common_utils.h"
+#include "sm_entry.h"
+#include "x2ap_init.h"
+#include "rrc_x2apOam_il_parser.h"
+#include "rrc_x2apOam_il_composer.h"
+#include "x2ap_csc.h"
+#include "rrc_handlers.h"
+#include "rrc_x2apCommon_intf.h"
+#include "x2ap_tracing.h"
+#ifdef ARICENT_SCTP_IPR
+#include "sctp_ipr.h"
+#include "s_stats.h"
+#include "s_mibdef.h"
+#else
+#include "sctp_kernel.h"
+#endif
+
+#include <lteMisc.h>
+
+/*Lockless Implementation start*/
+#ifndef LOCKLESS_IMPL
+QLOCK x2ap_lock;
+#endif
+/*Lockless Implementation stop*/
+/* GDB Fix - compiler warning */
+extern void x2ap_populate_configuration_parameters(x2ap_conf_param_t* p_tgt, x2ap_conf_param_t* p_src);
+
+void x2ap_process_oam_set_log_level_req(
+                 void                   *p_api,
+                 x2ap_gb_context_t *p_x2ap_gb_ctx);
+
+void x2ap_process_oam_get_log_level_req(
+                 void                   *p_api,
+                 x2ap_gb_context_t *p_x2ap_gb_ctx);
+
+void x2ap_process_oam_log_enable_req(
+                 void                   *p_api,
+                 x2ap_gb_context_t *p_x2ap_gb_ctx);
+
+U8 get_oam_log_level_from_x2ap_log_level
+(
+    U8 x2ap_log_level 
+    );
+
+void x2ap_process_oam_prov_req(
+        void             *p_api,
+        x2ap_gb_context_t   *p_x2ap_gb_ctx);
+
+extern void x2ap_popu_sctp_conf_info_from_gb_db(
+        x2ap_sctp_assoc_conf_info_t *p_sctp_assoc_conf_info,
+        x2ap_sctp_conf_info_t      *p_x2ap_sctp_conf_info);
+
+
+/* SPR-16334 START */
+extern void x2ap_process_enb_config_update_req(
+        void              *p_api,
+        x2ap_gb_context_t *p_x2ap_gb_ctx,
+        U16               dest_module_id);
+/* SPR-16334 END */
+
+
+
+x2ap_return_et  x2ap_create_server(
+        x2ap_gb_context_t *p_x2ap_gb_ctx);
+
+void    x2ap_invoke_sctp_sm(
+        x2ap_gb_context_t* p_x2ap_gb_ctx);
+
+void    x2ap_oam_populate_served_cell_info(
+        x2ap_gb_context_t        *p_x2ap_gb_ctx, 
+        x2ap_cell_info_t         *p_x2ap_gb_ctxt_cell_info,
+        x2apOam_srvd_cell_info_t *p_x2ap_oam_cell_info,
+        U8                       cell_id);
+void    x2ap_upd_neighbour_cell_info(
+        x2ap_gb_context_t        *p_x2ap_gb_ctx,
+        x2ap_neighbour_info_t    *p_neighbour_cell_info,
+        U8                        served_cell_id);
+void    x2ap_process_oam_cleanup_req(
+        void                 *p_api,
+        x2ap_gb_context_t   *p_x2ap_gb_ctx);
+void x2ap_process_oam_link_setup_req(
+        void                 *p_api,
+        x2ap_gb_context_t   *p_x2ap_gb_ctx);
+
+x2ap_return_et x2ap_start_csi_guard_tim(
+        x2ap_timer_id_en   timer_type,
+        U32                timer_value,
+        x2ap_timer_t      *p_timer_id);
+
+x2ap_return_et x2ap_build_and_send_s1ap_comm_info(
+        x2ap_gb_context_t *p_x2ap_gb_ctx);
+
+/* RSU Changes Start */
+extern x2ap_return_et x2ap_build_and_send_csc_cell_status_req(
+        x2ap_gb_context_t *p_x2ap_gb_ctx);
+extern const void * key_of_rsu_enb_meas_id_search_tree(
+        const YTNODE * p_node);
+
+extern S32 compare_rsu_enb_meas_id_search_tree(
+        const void * p_elem1,
+        const void * p_elem2);
+
+extern void rsu_st_init(
+      /* Pointer to tree being initialised */
+      x2ap_search_tree_t *p_tree,
+
+      /* Pointer to compare function :
+       it returns 0 if A==B, -1 if A<B and 1 if A>B */
+      S32 (*compare)(const void *, const void *),
+
+      /* Pointer to function returning Key */
+      const void *(*keyof)(const x2ap_search_tree_t *));
+
+extern void x2ap_process_add_enb(
+        void               *p_api,
+        x2ap_gb_context_t  *p_x2ap_gb_ctx,
+        U16                dest_module_id);
+
+extern void x2ap_process_del_enb(
+        void               *p_api,
+        x2ap_gb_context_t  *p_x2ap_gb_ctx,
+        U16                dest_module_id);
+/*sctp parameters start*/
+#ifdef ARICENT_SCTP_IPR
+void x2ap_oam_convert_sctp_mib_status(
+       sctpmib_assoc_state_et *p_assoc_state,
+      U32 *p_s1ap_oam_sctp_status);
+#endif
+
+void x2ap_process_oam_get_sctp_status_req(
+        void             *p_api,
+        x2ap_gb_context_t   *p_x2ap_gb_ctx);
+
+x2ap_return_et x2ap_build_oam_get_sctp_status_resp_with_bitmask(
+        x2ap_gb_context_t   *p_x2ap_gb_ctx,
+	x2ap_oam_get_sctp_status_req_t  *p_x2ap_oam_get_sctp_status_req,
+	x2ap_oam_get_sctp_status_resp_t  *p_x2ap_oam_get_sctp_status_resp,
+	U8 *gb_enb_id_count,
+	U8 *failed_enb_count);
+
+x2ap_return_et x2ap_build_oam_get_sctp_status_resp_without_bitmask(
+        x2ap_gb_context_t   *p_x2ap_gb_ctx,
+	x2ap_oam_get_sctp_status_resp_t  *p_x2ap_oam_get_sctp_status_resp,
+	U8 *gb_enb_id_count);
+
+/*sctp parameters stop*/
+
+void x2ap_process_oam_proc_req
+(
+    void *p_api
+    /*SPR 17777 +-*/
+);
+
+void x2ap_oam_send_proc_res
+(
+    U16 src_module_id,
+    U16 trans_id
+);
+
+void start_x2ap_health_monitor_timer
+(
+ /*SPR 17777 +-*/
+    U32                  duration
+);
+
+/*Bug 9305 start*/
+extern U32 x2ap_health_monitor_val;
+/*Bug 9305 end*/
+
+/*SPR_20175_FIX_START*/
+extern void x2ap_stop_x2_handover_procedure(
+		x2ap_peer_enb_context_t  *p_peer_enb_ctx);
+
+extern void x2ap_stop_resource_status_update_procedure(
+		x2ap_gb_context_t *p_x2ap_gb_ctx,
+		x2ap_peer_enb_context_t  *p_peer_enb_ctx);
+
+extern void x2ap_stop_enb_configuration_update_procedure(
+		x2ap_peer_enb_context_t  *p_peer_enb_ctx);
+
+extern void x2ap_send_reset_ind(
+		x2ap_gb_context_t *p_x2ap_gb_ctx,
+		x2ap_peer_enb_context_t* p_peer_enb_cntx,
+		x2ap_Cause cause);
+/*SPR_20175_FIX_STOP*/
+
+/*****************************************************************************
+ * Function Name  : x2ap_process_oam_messages
+ * Inputs         : p_api - Pointer to input API buffer
+ *                  p_x2ap_gb_ctx - Pointer to x2AP global context.
+ * Outputs        : None
+ * Returns        : None
+ * Description    : This function is invoked to handle OAM messages to x2AP.
+******************************************************************************/
+void x2ap_process_oam_messages(
+        /* Pointer to input API buffer */
+        void            *p_api,         
+
+        /* Pointer to the x2AP global context data */
+        x2ap_gb_context_t   *p_x2ap_gb_ctx)
+{
+
+    X2AP_ASSERT(X2AP_P_NULL != p_api);
+    X2AP_ASSERT(X2AP_P_NULL != p_x2ap_gb_ctx);
+
+    X2AP_UT_TRACE_ENTER();
+    switch (x2ap_get_api_id((U8*)p_api))
+    {
+       case X2AP_OAM_PROVISION_REQ:
+            x2ap_process_oam_prov_req(p_api, p_x2ap_gb_ctx);
+            break;
+       case X2AP_OAM_CLEANUP_REQ:
+            x2ap_process_oam_cleanup_req(p_api, p_x2ap_gb_ctx);
+            break;
+       case X2AP_OAM_LINK_SETUP_REQ:
+            x2ap_process_oam_link_setup_req(p_api, p_x2ap_gb_ctx);
+            break;
+       case X2AP_ADD_ENB_REQ:
+            x2ap_process_add_enb(p_api, p_x2ap_gb_ctx, RRC_OAM_MODULE_ID);
+            break;
+       case X2AP_DEL_ENB_REQ:
+            x2ap_process_del_enb(p_api, p_x2ap_gb_ctx, RRC_OAM_MODULE_ID);
+            break;
+       /*sctp parameters start*/
+       case X2AP_OAM_GET_SCTP_STATUS_REQ:
+            x2ap_process_oam_get_sctp_status_req(p_api, p_x2ap_gb_ctx);
+            break;
+       /*sctp parameters stop*/
+       case X2AP_OAM_PROC_SUPP_REQ:
+            x2ap_process_oam_proc_req(p_api);/*SPR 17777 +-*/
+            break;
+	    /* SPR-16334 START */            
+       case X2AP_ENB_CONFIG_UPDATE_REQ:
+	    x2ap_process_enb_config_update_req(p_api, p_x2ap_gb_ctx, RRC_OAM_MODULE_ID);
+	    break;
+	    /* SPR-16334 END */            
+       case X2AP_OAM_SET_LOG_LEVEL_REQ:
+            x2ap_process_oam_set_log_level_req(p_api, p_x2ap_gb_ctx);
+            break;
+       case X2AP_OAM_GET_LOG_LEVEL_REQ:
+            x2ap_process_oam_get_log_level_req(p_api, p_x2ap_gb_ctx);
+            break;
+       case X2AP_OAM_LOG_ENABLE_REQ:
+            x2ap_process_oam_log_enable_req(p_api, p_x2ap_gb_ctx);
+            break;
+       default:
+            X2AP_TRACE(X2AP_WARNING,
+                    "x2ap_process_oam_messages: "
+                    "unexpected API from OAM module received");
+            break;
+    }
+    X2AP_UT_TRACE_EXIT();
+}
+
+/******************************************************************************
+ * *   FUNCTION NAME: x2ap_process_oam_set_log_level_req 
+ * *   INPUTS       : void                  *p_api
+ * *                  x2ap_gb_context_t     *p_x2ap_gb_context.
+ * *   OUTPUTS      :
+ * *   DESCRIPTION:
+ * *       This function handles X2AP_OAM_SET_LOG_LEVEL_REQ msg
+ * *
+ * *   RETURNS:
+ * *       None
+ * ******************************************************************************/
+void x2ap_process_oam_set_log_level_req(
+        void                   *p_api,
+        x2ap_gb_context_t      *p_x2ap_gb_context)
+{
+    x2ap_oam_set_log_level_req_t    in_message;
+    x2ap_oam_set_log_level_resp_t   out_message;
+    S32 length_read    = RRC_NULL;
+    U16 transaction_id = RRC_NULL;
+
+    X2AP_UT_TRACE_ENTER();
+
+    X2AP_ASSERT(PNULL != p_api);
+    X2AP_ASSERT(PNULL != p_x2ap_gb_context);
+
+    memset_wrapper(&out_message, 0, sizeof(out_message));
+   if(RRC_SUCCESS !=  rrc_il_parse_x2ap_oam_set_log_level_req(
+                       &in_message,(U8*)p_api + RRC_FULL_INTERFACE_HEADERS_SIZE,
+                       rrc_get_api_buf_size(p_api) - RRC_FULL_INTERFACE_HEADERS_SIZE,
+                        &length_read))
+   {
+       X2AP_TRACE(X2AP_WARNING, "Bad message - ignore.");
+       X2AP_UT_TRACE_EXIT();
+       return;
+   }
+
+   transaction_id = rrc_get_transaction_id(p_api);
+

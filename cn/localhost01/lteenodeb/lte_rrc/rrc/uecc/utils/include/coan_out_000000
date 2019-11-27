@@ -1,0 +1,28 @@
+/******************************************************************************
+*
+*   FILE NAME:
+*       uecc_logger.h
+*
+*   DESCRIPTION:
+*       This is the file which contains logging and tracing definitions for UECC
+*
+*   DATE            AUTHOR      REFERENCE       REASON
+*   18 Aug 2009     AlexK       ---------       Initial
+*
+*   Copyright (c) 2009, Aricent Inc. All Rights Reserved
+*
+******************************************************************************/
+
+#ifndef UECC_LOGGER_H
+#define UECC_LOGGER_H
+
+#include "rrc_common_utils.h"
+#include "uecc_ue_ctx.h"
+#include "uecc_fsm_common.h"
+
+extern const S8 *rrc_uecc_log_facility_name;
+/*SPR 15896 Fix Start*/
+extern void trace_logging(uecc_ue_context_t *p_uecontext,U8 log_depth ,U8 interface,const char* format,...);
+extern void rrc_trace_max_file_write(uecc_ue_context_t *p_ue_context,int message ,U32 buffer_len,U8 *buffer, U8 interface);
+/*SPR 15896 Fix Stop*/
+

@@ -1,0 +1,12 @@
+export LTE_ROOT=`pwd`
+
+cd /usr/local/Cavium_Networks/OCTEON-SDK/
+. env-setup OCTEON_CN58XX --runtime-model
+
+cd $LTE_ROOT
+export LTE_CC='mips64-octeon-linux-gnu-gcc -mabi=n32'
+export LTE_AR=mips64-octeon-linux-gnu-ar
+export LTE_RANLIB=mips64-octeon-linux-gnu-ranlib
+export LTE_LD='mips64-octeon-linux-gnu-ld -melf32btsmipn32'
+export LTE_MAKE_BIN=$LTE_CC
+

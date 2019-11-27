@@ -1,0 +1,35 @@
+export LTE_ROOT=`pwd`
+export LTE_AR=ar rv
+export LTE_RANLIB=ranlib
+export HOST_COMPILATION=1
+export GTPU_SPLIT=1
+export SET_PDCP_GTPU_SPLIT_FLAG=1
+export RLC_PDCP_SPLIT_FLAG=0
+export LD_L3_ASN_DIR=$WORK_DIR/LTE_IPR/lteenodeb/lte_rrc/rrc/asn/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LD_L3_ASN_DIR
+
+BIT=$(getconf LONG_BIT)
+ARCH=$(uname -m)
+
+if [ "$BIT" == "32" ]; then
+    export LTE_CC=gcc 
+    export LTE_MAKE_BIN=gcc 
+    export LTE_LD='ld -r'  
+elif [ "$BIT" == "64" ]; then
+# SPR 20430 Changes Start #
+    export LTE_CC=gcc
+    export LTE_MAKE_BIN=gcc
+    export LTE_LD='ld -r' 
+# SPR 20430 Changes End #
+else
+          echo "Machine is neither 32 bit nor 64 bit"
+fi
+
+# SPR 20636 Changes Start#
+sed -i "s/KNOWN_ARCH := .*/KNOWN_ARCH := "$ARCH"/g" simulators/protocolSimulatorTool/flags.mk
+# SPR 20636 Changes End #
+echo "KNOWN_ARCH variable changed to $ARCH in simulators/protocolSimulatorTool/flags.mk"
+
+sed -i "s/URLC_PDCP_IPC_INTF/DRLC_PDCP_IPC_INTF/g" make.inc
+sed -i "s/DDL_DATA_SEPARATION/UDL_DATA_SEPARATION/g" make.inc
+sed -i "s/UPDCP_GTPU_INTF/DPDCP_GTPU_INTF/g" make.inc

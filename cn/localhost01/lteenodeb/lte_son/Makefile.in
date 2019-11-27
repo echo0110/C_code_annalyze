@@ -1,0 +1,96 @@
+#/****************************************************************************
+# *
+# *  ARICENT -
+# *
+# *  Copyright (c) Aricent.
+# *
+# ****************************************************************************
+# *
+# *  $Id: Makefile.in ,v 1.0 2012/01/17 12:13:41 gur26210 Exp $
+# *
+# ****************************************************************************
+# *
+# *  File Description : NMM Enviornment Settings file
+# *
+# ****************************************************************************
+# *
+# * Revision Details
+# * ----------------
+# *
+# *
+# *
+# *
+# *
+# *
+# ****************************************************************************/
+
+INCLUDE_COMM = $(LTE_SON)/common/include
+INCLUDE_LTE_COMMON = $(COMMON_ROOT)/include
+INCLUDE_LGR = ${LTE_ROOT}/common/in_memory_logging/include
+INCLUDE_INTERFACE = $(LTE_SON)/interface/include
+INCLUDE_ANR = $(LTE_SON)/core/son_anr/include
+INCLUDE_MRO = $(LTE_SON)/core/son_mro/include
+INCLUDE_MLB = $(LTE_SON)/core/son_mlb/include
+INCLUDE_ES = $(LTE_SON)/core/son_es/include
+INCLUDE_RACH_OPT = $(LTE_SON)/core/son_rach_opt/include
+INCLUDE_RRM = $(LTE_ROOT)/lte_rrm/interface/include
+INCLUDE_RRC=-I${LTE_ROOT}/lte_rrc/tools/advlogger/src/include
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/s1ap/include/
+INCLUDE_RRC+=-I${LTE_ROOT}/lte_rrc/rrc/common/include/
+INCLUDE_RRC+=-I${LTE_ROOT}/lte_rrc/rrc/common/include/multi/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/common/rrmim/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/asn/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/x2ap/init/inc/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/runner/include/
+INCLUDE_RRC+=-I$(LTE_ROOT)/lte_rrc/rrc/common/s1ap_wrap/include/
+INCLUDE_X2AP = $(LTE_ROOT)/lte_rrc/x2ap/init/inc/
+INCLUDE_IMPORT = $(LTE_SON)/import/include
+INCLUDE_SIB = $(LTE_ROOT)/sib_decoder/include
+INCLUDE_UMTS_SIB = $(LTE_ROOT)/umts_sib_decoder/include
+
+ADVLOG_INC = $(LTE_ROOT)/lte_rrc/tools/advlogger/src
+LTEMISC_INC = $(LTE_ROOT)/common/src
+
+
+INCLUDE_RRM+=-I$(LTE_ROOT)/common/include/
+
+SON_BUILD = $(LTE_SON)/build
+OBJDIR = $(SON_BUILD)/obj
+LIBDIR = $(SON_BUILD)/lib
+RELEASE = $(SON_BUILD)/release
+
+LIB_SIB_DECODER = $(LTE_ROOT)/sib_decoder/lib
+LIB_UMTS_SIB_DECODER = $(LTE_ROOT)/umts_sib_decoder/lib
+LIB_IN_MEM_LGR = $(LTE_ROOT)/common/lib
+
+CSPL_BUILD = $(LTE_ROOT)/lte_rrc/cspl/build
+CSPL_INC = $(LTE_ROOT)/lte_rrc/cspl/h
+CSPL_POSIX = $(LTE_ROOT)/lte_rrc/cspl/ports/posix
+
+SON_FLAG = -DMODULE_LOGGING
+#SON_FLAG += -DSON_INTERNAL_LOGGER
+#SON_FLAG += -DSON_ADV_LOGGER
+ifneq '$(LTE_SON_PLATFORM)' 'mspd'
+SON_FLAG += -DSON_IN_MEM_LOGGER=3
+endif
+
+ifeq '$(COMPILE_MRO)' 'yes'
+SON_FLAG += -DSON_MRO_FEATURE
+endif
+ifeq '$(COMPILE_MRO)' 'no'
+SON_FLAG += -USON_MRO_FEATURE
+endif
+ifeq '$(LTE_SON_PLATFORM)' 'fapi'
+SON_FLAG += -D__SON_FAPI__
+endif
+
+ifeq '$(LTE_SON_PLATFORM)' 'mspd'
+SON_FLAG +=  -D__SON_MSPD__
+endif
+               ## SPR 20430 Changes Start  ##
+#SON_FLAG += -Werror
+               ## SPR 20430 Changes Start  ##
+ifeq '$(LTE_SON_PLATFORM)' 'astri'
+SON_FLAG +=  -D__SON_ASTRI__
+endif
+SON_FLAG += -USON_DEBUG

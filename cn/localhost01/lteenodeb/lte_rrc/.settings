@@ -1,0 +1,10 @@
+
+
+
+export CSPL_DIR=`pwd`/cspl/
+export RRC_ROOT=`pwd`/
+export SIGTRAN_DIR=`pwd`/sctp/
+export X2AP_DIR=`pwd`/x2ap/
+export M2AP_DIR=`pwd`/m2ap/
+
+

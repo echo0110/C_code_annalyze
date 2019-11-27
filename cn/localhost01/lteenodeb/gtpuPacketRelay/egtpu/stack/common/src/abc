@@ -1,0 +1,19 @@
+egtpu_cdb.c:641:17: warning: C++ style comments are not allowed in ISO C90
+egtpu_cdb.c:641:17: warning: (this will be reported only once per input file)
+In file included from egtpu_cdb.c:24:
+/home/pushpendra/6_dec/egtpu/LTE_IPR/lteenodeb/common/include/lte_port/ylib.h:134: warning: function declaration isn’t a prototype
+In file included from /home/pushpendra/6_dec/egtpu/LTE_IPR/lteenodeb/common/include/lteMemPool.h:73,
+                 from /home/pushpendra/6_dec/egtpu/LTE_IPR/lteenodeb/gtpuPacketRelay/egtpu//shared/h/egtpu_glob.h:24,
+                 from egtpu_cdb.c:25:
+/home/pushpendra/6_dec/egtpu/LTE_IPR/lteenodeb/common/include/lteTypes.h:83: warning: ISO C90 does not support ‘long long’
+egtpu_cdb.c: In function ‘egtpu_stop_reorder_timers’:
+egtpu_cdb.c:331: warning: suggest braces around empty body in an ‘if’ statement
+egtpu_cdb.c: In function ‘egtpu_db_init_hash_ctxt_tbl’:
+egtpu_cdb.c:423: warning: implicit declaration of function ‘cvContextPoolSetup’
+egtpu_cdb.c: In function ‘egtpu_db_destroy_hash_ctxt_tbl’:
+egtpu_cdb.c:537: warning: implicit declaration of function ‘cvContextPoolDelete’
+egtpu_cdb.c: In function ‘egtpu_init_hash’:
+egtpu_cdb.c:602: warning: implicit declaration of function ‘cvContextAlloc’
+egtpu_cdb.c:602: warning: assignment makes pointer from integer without a cast
+egtpu_cdb.c: In function ‘egtpu_db_destroy_peer_ctxt_tbl’:
+egtpu_cdb.c:640: warning: suggest braces around empty body in an ‘if’ statement

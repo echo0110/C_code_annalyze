@@ -1,0 +1,95 @@
+# File Description
+#*********************************************************************************************
+# This file contains the information of Aperiodic CQI report as required by the ENodeB.
+#*********************************************************************************************
+# crnti (UE Identifier)
+#numCqiInstances - this parameters means how many cqi reports user wants to send
+# based upon this parameter simulator will send all the report type present on
+# files for that particular crnti one by one.
+#
+# reportType - Aperiodic cqi report type can be any of the following -
+# reportingMode= Denotes the Modes for Aperioidic CQI.
+#
+# APERIODIC_CQI_MODE_2_0  = 29
+# wBandCqiIndex - Any value among 0 - 15 
+# subBandCqi - Any value among 0 - 15 
+# subBandLength - Depending on Configured RBs 
+#                1 (For DL RBs 8-10),
+#                3 (For DL RBs 11-26),
+#                5 (For DL RBs 27-63),
+#                6 (For DL RBs 64 . 110)
+
+# subBandNum - Depending on Configured RBs 
+#             0 to 4 (For DL RBs 8-10),
+#             0 to 12 (For DL RBs 11-26),
+#             0 to 20 (For DL RBs 27-63),
+#             0 to 24 (For DL RBs 64 . 110)
+#
+# APERIODIC_CQI_MODE_3_0  = 30
+# wBandCqiIndex - Any value among 0 - 15
+# subBandLength - Any value among 1 - 13
+# subBandNumi - Any value among 0 - 12
+# subBandCqi - Any value among 0 - 15
+#
+# APERIODIC_CQI_MODE_3_1  = 31
+# widebandCQIValueCodeword0 - Any value among 0 - 15
+# widebandCQIValueCodeword1 - Any value among 0 - 15
+# widebandPMI - 1, 2 or 4 
+# subBandLengthi - Any value among 1 - 13
+# subBandNum - Any value among 0 - 12
+# subBandcqiValueCodeWord0 - Any value among 0 - 15
+# subBandcqiValueCodeWord1 - Any value among 0 - 15
+#
+# APERIODIC_CQI_MODE_1_2  = 32
+# widebandCQIValueCodeword0 - Any value among 0 - 15
+# widebandCQIValueCodeword1 - Any value among 0 - 15
+# subBandLengthi - Any value among 1 - 13
+# subBandNumi - Any value among 0 - 12
+# widebandPMI - 1, 2 or 4 
+#
+# APERIODIC_CQI_MODE_2_2  = 33
+# widebandCQIValueCodeword0 - Any value among 0 - 15
+# widebandCQIValueCodeword1 - Any value among 0 - 15
+# cqiValueCodeWord0 - Any Value among 0 -15
+# cqiValueCodeWord1 - Any Value among 0 -15
+# widebandPMI - 1, 2 or 4 
+# subBandLengthi - Any value among 1 - 13
+# subBandNumi - Any value among 0 - 12
+#
+#********************************************************************************************
+[UE]
+crnti=61
+numCqiInstances=5
+reportType=29
+wBandCqiIndex=12
+subBandCqi=1
+subBandLength=3
+subBandNum=0,1,2
+reportType=30
+wBandCqiIndex=12
+subBandLength=3
+subBandNum=0,1,2
+subBandCqi=1,2,3
+reportType=31
+widebandCQIValueCodeword0=4
+widebandCQIValueCodeword1=4
+widebandPMI=2
+subBandLength=3
+subBandNum=0,1,2
+subBandcqiValueCodeWord0=1,2,3
+subBandcqiValueCodeWord1=1,2,3
+reportType=32
+widebandCQIValueCodeword0=4
+widebandCQIValueCodeword1=4
+subBandLength=3
+subBandNum=0,1,2
+widebandPMI=2,3,4
+reportType=33
+widebandCQIValueCodeword0=4
+widebandCQIValueCodeword1=4
+cqiValueCodeWord0=4
+cqiValueCodeWord1=1
+widebandPMI=2
+subBandLength=3
+subBandNum=0,1,2
+

@@ -1,0 +1,329 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "glbuild"=.\glbuild.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libgl_htm_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_html
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_lm_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_lml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_mqm_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_mqml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_sim_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_siml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_mm_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_mml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_tm_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_tml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_ulml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_ulm_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_gsciml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_gscim_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_skml
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_tm_single_timeout
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_tm_single_timeout_mtl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libgl_tmportl
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libgl_gscim_mtl"=.\libgl_gscim_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_gsciml"=.\libgl_gsciml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_htm_mtl"=.\libgl_htm_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_html"=.\libgl_html.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_lm_mtl"=.\libgl_lm_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_lml"=.\libgl_lml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_mqm_mtl"=.\libgl_mqm_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_mqml"=.\libgl_mqml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_sim_mtl"=.\libgl_sim_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_siml"=.\libgl_siml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_mm_mtl"=.\libgl_mm_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_mml"=.\libgl_mml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_skml"=.\libgl_skml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_tm_mtl"=.\libgl_tm_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_tm_single_timeout"=.\libgl_tm_single_timeout.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_tm_single_timeout_mtl"=.\libgl_tm_single_timeout_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_tml"=.\libgl_tml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_tmportl"=.\libgl_tmportl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_ulm_mtl"=.\libgl_ulm_mtl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libgl_ulml"=.\libgl_ulml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

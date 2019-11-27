@@ -1,0 +1,56 @@
+#!/bin/bash
+#THIS SCRIPT GENERATES HTML DOCUMENTATION FOR LTEENODEB PROJECT
+#1. gcov tool is required
+#2. lcov tool is required(needs install)
+#3. genhtml tool is required
+#4. directory with name "report" will be created after successful execution
+
+dname=""
+dname1=""
+list=""
+tmpflist=""
+tmpinfofname=all.info
+outdirname=report
+rootdir=./
+
+#find *.gcda files - they are generated after executable tested file was launched
+#for each directory *.info file with statistic information will be created
+echo 'Create info files for each folder'
+tmpflist=`find -name "*.gcda"`
+
+#enumerate lines in list
+i=0;for line in tmpflist; do
+ dname=`dirname $line`
+
+#launch lcov utility only one time for each directory
+ if test "$dname" == "$dname1"; then
+    continue;
+ fi
+
+#create info file for current directory
+ lcov -c -b $rootdir -d $dname -o "$((i++)).info"
+
+#store current directory name for next cycle iteration
+ dname1=$dname
+done< <(echo $tmpflist)
+
+echo 'Create one info file'
+#append all info files to one info file
+tmpflist=`find -name "*.info"`
+while read line; do
+ list+=" -a $line"
+done< <(echo $tmpflist)
+
+#append to one info file
+lcov $list -o $tmpinfofname
+
+#delete old report
+rm -rf $outdirname
+
+echo 'Generate HTML-report'
+#generate html report
+genhtml $tmpinfofname -o $outdirname
+
+#delete temporary files
+xargs rm -rf< <(echo $tmpflist)
+rm -rf $tmpinfofname

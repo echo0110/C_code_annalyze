@@ -1,0 +1,42 @@
+/*******************************************************************************
+*
+*  FILE NAME   : x2ap_tracing.h
+*
+*  DESCRIPTION : This file contains the structure and function declaration
+*                required for x2ap Logging and tracing.
+*
+*  DATE 24-June-2010 NAME Ashutosh Gupta REFERENCE 36.423_880(3GPP Spec) REASON
+*
+*  Copyright 2007, Aricent Inc.
+*
+*******************************************************************************/
+#ifndef _X2AP_TRACE_H_
+#define _X2AP_TRACE_H_
+
+#include "commoninc.h"
+#include "rrc_common_utils.h"
+#include "x2ap_db.h"
+#include "x2ap_types.h"
+
+/*
+*   logging
+*/
+
+void x2ap_set_loglevel(U8 new_log_level);
+void x2ap_set_module_loglevel(U8 new_log_level);
+
+extern const S8 *x2ap_log_facility_name;
+
+U8 get_x2ap_log_level_from_oam_log_level
+(
+    U8 oam_log_level
+);
+
+void x2ap_change_logging_parameters
+(
+    x2ap_gb_context_t       *p_x2ap_gb_ctx,
+    U8                      log_level,
+    x2ap_bool_et            log_on_off
+);
+
+

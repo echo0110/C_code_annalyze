@@ -1,0 +1,167 @@
+/**
+\mainpage
+
+<h1> LTE 3G logging library </h1>
+
+<br>
+The LTE 3G logging library is intended to provide simple C interface for logging into various UNIX log targets and be cross-platform in the borders of UNIX operating systems. The library is not belongs to 3G or LTE 3G itself, but had been created in the project boundaries. Generally, it can be used in any project as separate logging library.<br>
+
+<br><br>
+<h2>Index</h2>
+
+<ul>
+	<li><a href="#installation">Installation</a></li>
+	<li><a href="#main_features">Main features</a></li>
+	<li><a href="#quickstart_guide">Quickstart guide</a></li>
+	<li><a href="#code_tips">Code tips and tricks</a></li>
+</ul>
+
+
+<br><br><a name="installation">
+<h2>Installation</h3>
+
+<p>
+	1. Unpack source tarball using command:<br>
+	<i>tar xvzf liblte_3g_logging-1.0.tar.bz</i>
+</p>
+
+<p>
+	2. Go to the sources directory and run configure script:<br>
+	<i>cd liblte_3g_logging-1.0</i><br>
+	<i>./configure</i><br>
+	
+	<b>Note:</b> you may use special configure parameters to enable debug symbols, disable multithreading support, change prefix, etc.<br>
+	For example, to build project with debug symbols enabled, use the following command instead:<br>
+	<i>./configure --enable-debug</i><br>
+	
+	For full set of configure parameters run:<br>
+	<i>./configure --help</i>
+	
+</p>
+
+<p>
+	3. Build and install library:<br>
+	<i>make && make install</i>
+</p>
+
+<br><br><a name="main_features">
+<h2>Main feautes</h2>
+
+<h3>Log targets:</h3>
+<ul>
+	<li>Console - console logging target. It may be useful for short term debugging tasks, however useless for production long term logging. Note that Fatal and Error log levels are logged into
+		stderr, while others into stdout and you may filter it using regular shell syntax <appname> 2> error.log 1> info.log</li>
+	<li>Syslog - syslog daemon. This is most expandable log target, however not suitable for large logs or under high system load</li>
+	<li>File - file logging target. Special file will be created in append mode to collect log messages</li>
+</ul>
+
+<h3>Log levels:</h3>
+<ul>
+	<li>LogFatal - Fatal error. The program cannot continue and will exit immidiatelly.</li>
+  	<li>LogError - Failure in one of program modules or threads, resulting in its termination. Overal application is stable and continue working.</li>
+ 	<li>LogWarning - Non-critical, but important comment reveals possible future problems</li>
+ 	<li>LogNotice - Minor warning about program functioning</li>
+ 	<li>LogInfo - Informational message</li>
+ 	<li>LogDebug - Debugging message</li>
+</ul>
+
+
+<h3>Quick initialization</h3>
+Quick initialization using one function call to init_log(). No separate deinitialization needed.
+
+<h3>Facilities support</h3>
+Facility support for quick indication of the subsystem.
+
+<h3>Simple logging interface</h3>
+Using of log_message() with printf-like syntax and with only 2 additional parameters of log level and facility makes logging easy. Writing separate logging macro for eaxh facility makes it even easier.
+
+<h3>Log level limitation</h3>
+Logging can be limited using set_loglevel_limit() function to display only messages with log level less or equal than specified. For example it is possible to show only Fatal and Error messages, skipping all others.
+
+
+
+<br><br><a name="quickstart_guide">
+<h2>Quickstart guide:</h2>
+
+Use one of the following targets to build an application and link it with library using the following command:<br>
+<i>gcc -o exec_file_name source_file_name.c -llte_3g_logging</i>
+
+<h3>Console logging: </h3>
+\code
+#include <stdio.h>
+#include <lte_3g_logging.h>
+
+int main()
+{
+	init_log(LogTarget_Console, NULL);
+	log_message(LogInfo, "Facility", "Informational message #%d", 2147);
+
+	return 0;
+}
+\endcode
+
+<i>Output example:</i>
+2009.02.04 15:29:07  Info      Facility console_log.c      33   Informational message #2147
+
+<h3>Syslog logging</h3>
+
+\code
+#include <stdio.h>
+#include <lte_3g_logging.h>
+
+int main()
+{
+	init_log(LogTarget_Syslog, "Application name");
+	// ...
+
+	return 0;
+}
+\endcode
+
+<h3>File logging</h3>
+
+\code
+#include <stdio.h>
+#include <lte_3g_logging.h>
+
+int main()
+{
+	init_log(LogTarget_File, "/var/log/lte_3g_logging_test.log");
+	// ...
+
+	return 0;
+}
+\endcode
+
+
+<br><br><a name="code_tips">
+<h2>Code tips and tricks:</h2>
+
+<h3>Writing facility logging macro:</h3>
+To skip the necisity to write facility name into log_message() macro each time you call it, you may write a separate logging macro for each facility or subsystem you use:<br>
+
+\code
+#define log_L3_message(log_level, format, message...) \
+{ \
+	write_log_message(log_level, __FILE__, __LINE__, __func__, "LTE RRC Layer 3", format, ##message); \
+}
+\endcode
+
+or 
+
+\code
+extern const char* layer3FacilityName;
+#define log_L3_message(log_level, format, message...) \
+{ \
+	write_log_message(log_level, __FILE__, __LINE__, __func__, layer3FacilityName, format, ##message); \
+}
+\endcode
+
+if you want to ensure that linker will keep only one string instance in executable.<br>
+
+<br>
+From now on you can simply run the following macro:
+\code
+log_l3_message(LogInfo, "RRC Layer 3 specific info");
+\endcode
+*/

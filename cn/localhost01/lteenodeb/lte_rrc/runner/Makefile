@@ -1,0 +1,488 @@
+###################################################################
+# 
+#  FILE NAME   : Makefile 
+# 
+#  DESCRIPTION : The RRC Runner make file 
+# 
+#  REVISION HISTORY : 
+# 
+#  DATE          Name        Reference        Comments 
+#  ----          ----        ---------        -------- 
+#
+#  Copyright (c) 2009, Aricent Inc. 
+# 
+###################################################################
+
+#Load make parameters
+include lterunner.mk 
+
+#Check build mode
+ifeq ($(filter $(MODE),$(RUNNER_KNOWN_MODE)),)
+  $(error Unknown mode '$(MODE)'. Known modes are: $(foreach m,$(RUNNER_KNOWN_MODE),'$m'))
+endif
+
+#Check logger type
+ifeq ($(filter $(LOGGER_TYPE),$(LOGGER_KNOWN_TYPE)),)
+  $(error Unknown logger type '$(LOGGER_TYPE)'. Known types are: $(foreach m,$(LOGGER_KNOWN_TYPE),'$m'))
+endif
+
+#Check Log and Alm Frwk integration
+ifeq ($(filter $(LOG_ALM_FRWK),$(LOG_ALM_FRWK_KNOWN_TYPE)),)
+  $(error Invalid LOG_ALM_FRWK option: '$(LOG_ALM_FRWK)'. Known types are: $(foreach m,$(LOG_ALM_FRWK_KNOWN_TYPE),'$m'))
+endif
+
+#Check Endian type
+ifeq ($(filter $(ENDIAN_TYPE),$(ENDIAN_KNOWN_TYPE)),)
+  $(error Unknown logger type '$(ENDIAN_TYPE)'. Known types are: $(foreach m,$(ENDIAN_KNOWN_TYPE),'$m'))
+endif
+
+
+#Check Core Binding type
+ifeq ($(filter $(CORE_BINDING),$(CORE_BINDING_TYPE)),)
+  $(error Invalid CORE_BINDING option '$(CORE_BINDING)'. Known types are: $(foreach m,$(CORE_BINDING_TYPE),'$m'))
+endif
+
+#MENB_CHANGES_START
+ifeq ($(filter $(ENDC_FEAT),$(ENDC_FEAT_KNOWN_TYPE)),)
+  $(error Invalid ENDC_FEAT option '$(ENDC_FEAT)'. Known types are: $(foreach m,$(ENDC_FEAT_KNOWN_TYPE),'$m'))
+endif
+#MENB_CHANGES_END
+
+# M2AP Changes - Start
+ifeq ($(filter $(EMBMS_FEAT),$(EMBMS_FEAT_KNOWN_TYPE)),)
+  $(error Invalid EMBMS_FEAT option '$(EMBMS_FEAT)'. Known types are: $(foreach m,$(EMBMS_FEAT_KNOWN_TYPE),'$m'))
+endif
+# M2AP Changes - End
+
+# NBIOT Changes - Start
+ifeq ($(filter $(NBIOT_FEAT),$(NBIOT_FEAT_KNOWN_TYPE)),)
+  $(error Invalid NBIOT_FEAT option '$(NBIOT_FEAT)'. Known types are: $(foreach m,$(NBIOT_FEAT_KNOWN_TYPE),'$m'))
+endif
+# NBIOT Changes - End
+
+#Check Thread Core Binding type
+ifeq ($(filter $(THREAD_CORE_BINDING),$(THREAD_CORE_BINDING_TYPE)),)
+  $(error Invalid THREAD_CORE_BINDING option '$(THREAD_CORE_BINDING)'. Known types are: $(foreach m,$(THREAD_CORE_BINDING_TYPE),'$m'))
+endif
+
+
+
+#Select compiler options 
+#Lockless Implementation start
+RUNNER_DEFINES = $(RUNNER_DEFINES_$(MODE)) -US1AP_UT_TESTING -UL3_SSIT_UDP_SETUP -ULOCKLESS_IMPL
+
+#MENB_CHANGES_START
+ifeq '$(ENDC_FEAT)' 'enable'
+RUNNER_DEFINES += -DENDC_ENABLED
+endif
+#MENB_CHANGES_END
+
+#Lockless Implementation stop
+#SPR 15521
+ifeq '$(LOG_ALM_FRWK)' 'enable'
+    RUNNER_DEFINES += -DALM_FRWK -DLAYER2_ALARM_REPORTING_ENABLED
+endif    
+RUNNER_CFLAGS = $(RUNNER_CFLAGS_$(MODE))
+RUNNER_CFLAGS += $(CPPFLAGS) 
+RUNNER_CFLAGS += $(SCTP_FLAGS)
+
+ifeq ($(LTE_CC), aarch64-linux-gnu-gcc)
+RUNNER_CFLAGS += -I/home/zhanghh/sysroot/sysroot-glibc-linaro-2.25-2019.02-aarch64-linux-gnu/usr/include
+endif
+ifeq ($(RRC_UNIT_TEST_FRAMEWORK), 1)
+	RUNNER_DEFINES += -DRRC_UNIT_TEST_FRAMEWORK
+#MENB_CHANGES_START
+ifeq '$(ENDC_FEAT)' 'enable'
+	RUNNER_CFLAGS  += -DENDC_ENABLED 
+endif
+#MENB_CHANGES_END
+endif
+
+ifeq '$(ENDIAN_TYPE)' 'little'
+	RUNNER_DEFINES += -DLTE_L3_LITTLE_ENDIAN
+endif
+#SPR 19713 change start
+#change for 19288 removed
+#SPR 19713 change end
+ifeq '$(ENDIAN_TYPE)' 'big'
+	RUNNER_DEFINES += -DLTE_L3_BIG_ENDIAN
+endif
+
+
+ifeq '$(CORE_BINDING)' 'enable'
+	RUNNER_DEFINES += -DL3_CORE_BINDING_ENABLE
+endif
+
+ifeq '$(THREAD_CORE_BINDING)' 'enable'
+	RUNNER_DEFINES += -DL3_THREAD_CORE_BINDING_ENABLE
+endif
+
+ifeq ($(RLC_PDCP_SPLIT_FLAG), 1)
+	RUNNER_DEFINES += -DCRAN_RLC_PDCP_SPLIT
+endif
+
+ifeq '$(LOGGER_TYPE)' 'internal'
+	RUNNER_DEFINES += $(RUNNER_DEFINES_intlogger)
+endif
+
+ifeq '$(LOGGER_TYPE)' 'advanced'
+	RUNNER_DEFINES += $(RUNNER_DEFINES_advlogger)
+endif
+
+RUNNER_DEFINES += $(RUNNER_DEFINES_PL)
+# M2AP Changes - Start
+ifeq '$(EMBMS_FEAT)' 'enable'
+	RUNNER_DEFINES += -DLTE_EMBMS_SUPPORTED 
+endif
+# M2AP Changes - End
+
+ifeq '$(LINUX_PC_TEST)' 'true'
+    RUNNER_DEFINES += -DLINUX_PC_TEST 
+	RUNNER_LIBS_EXT += -lgcov
+	RUNNER_CFLAGS   += -fprofile-arcs -ftest-coverage
+endif
+
+ifeq ($(RRC_UT_FRAMEWORK), 1)
+   L3_SUIT_OBJFILES=$(L3_SUIT_OBJ_DIR)/test_cunit.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_counting_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_enb_config_update_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_error_indication_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_mce_config_update_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_msi_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_reset_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_session_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_setup_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_stats_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_init_prov_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_x2ap_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_sctp_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_asn_enc_dec_suite.o \
+   					$(L3_SUIT_OBJ_DIR)/m2ap_generic_code_suite.o \
+					$(L3_SUIT_OBJ_DIR)/nbiot_cell_setup_suite.o \
+					$(L3_SUIT_OBJ_DIR)/nbiot_ue_admission_suite.o \
+					$(L3_SUIT_OBJ_DIR)/nbiot_cell_start_suite.o \
+					$(L3_SUIT_OBJ_DIR)/nbiot_cell_stop_suite.o \
+					$(L3_SUIT_OBJ_DIR)/nbiot_cell_delete_suite.o
+endif
+
+#The RRC Runner common and specific include folders
+RUNNER_INCLUDES= $(RUNNER_COMMON_INCLUDES) -I${TEST_INC_DIR} -I${LINUX_SOURCE} 
+
+#The RRC Runner source files folders
+RUNNER_SRCDIR=$(RUNNER_ROOT)
+
+
+#The RRC Runner object list
+RUNNER_OBJFILES= $(OBJDIR)/rrc_entity.o
+RUNNER_OBJFILES+= $(OBJDIR)/rrc_porting.o
+
+#The RRC Runner libraries list
+RUNNER_RRC_DIR= $(RUNNER_ROOT)/../rrc
+RUNNER_RRC_LIBDIR= $(RUNNER_RRC_DIR)/bld/$(MODE)/lib
+RUNNER_RRC_LIBS=    $(RUNNER_RRC_LIBDIR)/librrcuecc.a \
+					$(RUNNER_RRC_LIBDIR)/librrcueccmd.a  \
+					$(RUNNER_RRC_LIBDIR)/librrccsc.a  \
+					$(RUNNER_RRC_LIBDIR)/librrcoamh.a \
+					$(RUNNER_RRC_LIBDIR)/librrcllim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcoamim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcrrmim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1apim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1ap.a \
+					$(RUNNER_RRC_LIBDIR)/librrcS1apOamim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcS1apRrmim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1apwrap.a \
+					$(RUNNER_RRC_LIBDIR)/librrcasn.a \
+					$(RUNNER_RRC_LIBDIR)/librrccommon.a \
+					$(RUNNER_RRC_LIBDIR)/libx2ap.a
+
+# M2AP Changes - Start
+ifeq '$(EMBMS_FEAT)' 'enable'
+RUNNER_RRC_LIBS += $(RUNNER_RRC_LIBDIR)/libm2ap.a
+endif
+# M2AP Changes - End
+
+ifeq '$(MODE)' 'debug_with_license'
+#The RRC Runner object list
+RUNNER_OBJFILES= $(OBJDIR)/rrc_entity.o
+RUNNER_OBJFILES+= $(OBJDIR)/rrc_validation.o
+RUNNER_OBJFILES+= $(OBJDIR)/rrc_check.o
+RUNNER_OBJFILES+= $(OBJDIR)/rrc_porting.o
+
+#The RRC Runner libraries list
+RUNNER_RRC_DIR= $(RUNNER_ROOT)/../rrc
+RUNNER_RRC_LIBDIR= $(RUNNER_RRC_DIR)/bld/$(MODE)/lib
+RUNNER_RRC_LIBS=    $(RUNNER_RRC_LIBDIR)/librrcuecc.a \
+					$(RUNNER_RRC_LIBDIR)/librrcueccmd.a  \
+					$(RUNNER_RRC_LIBDIR)/librrccsc.a  \
+					$(RUNNER_RRC_LIBDIR)/librrcoamh.a \
+					$(RUNNER_RRC_LIBDIR)/librrcllim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcoamim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcrrmim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1apim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1ap.a \
+					$(RUNNER_RRC_LIBDIR)/librrcS1apOamim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcS1apRrmim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1apwrap.a \
+					$(RUNNER_RRC_LIBDIR)/librrcasn.a \
+					$(RUNNER_RRC_LIBDIR)/librrccommon.a\
+					$(RUNNER_RRC_LIBDIR)/liblas.a
+endif
+
+ifeq '$(MODE)' 'release_with_license'
+#The RRC Runner object list
+RUNNER_OBJFILES= $(OBJDIR)/rrc_entity.o
+RUNNER_OBJFILES+= $(OBJDIR)/rrc_validation.o
+RUNNER_OBJFILES+= $(OBJDIR)/rrc_check.o
+RUNNER_OBJFILES+= $(OBJDIR)/rrc_porting.o
+
+
+#The RRC Runner libraries list
+RUNNER_RRC_DIR= $(RUNNER_ROOT)/../rrc
+RUNNER_RRC_LIBDIR= $(RUNNER_RRC_DIR)/bld/$(MODE)/lib
+RUNNER_RRC_LIBS=    $(RUNNER_RRC_LIBDIR)/librrcuecc.a \
+					$(RUNNER_RRC_LIBDIR)/librrcueccmd.a  \
+					$(RUNNER_RRC_LIBDIR)/librrccsc.a  \
+					$(RUNNER_RRC_LIBDIR)/librrcoamh.a \
+					$(RUNNER_RRC_LIBDIR)/librrcllim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcoamim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcrrmim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1apim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1ap.a \
+					$(RUNNER_RRC_LIBDIR)/librrcS1apOamim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcS1apRrmim.a \
+					$(RUNNER_RRC_LIBDIR)/librrcs1apwrap.a \
+					$(RUNNER_RRC_LIBDIR)/librrcasn.a \
+					$(RUNNER_RRC_LIBDIR)/librrccommon.a\
+					$(RUNNER_RRC_LIBDIR)/liblas.a
+endif
+
+RUNNER_CSPL_DIR= $(RUNNER_ROOT)/../cspl
+RUNNER_CSPL_LIBDIR= $(RUNNER_CSPL_DIR)/build
+RUNNER_CSPL_LIBS=	$(RUNNER_CSPL_LIBDIR)/cspl.lib.o
+
+RUNNER_DRIVER_LIBS=	$(LIBDIR)/librrc_driver.a
+RUNNER_DRIVER_INCLUDES= $(RUNNER_COMMON_INCLUDES)
+RUNNER_DRIVER_OBJFILES= $(OBJDIR)/shell.o
+RUNNER_DRIVER_SRCDIR= $(RUNNER_ROOT)/drivers/$(RUNNER_DRIVER)
+
+RUNNER_ASN_LIBDIR= -L$(RUNNER_RRC_DIR)/asn/lib/
+ifeq ($(LTE_CC), arm-linux-gnueabi-gcc)
+#$(warning "redefine the <<<<<<<<<<<<<<<<< $(RUNNER_RRC_DIR)")
+RUNNER_ASN_LIBDIR= -L$(RUNNER_RRC_DIR)/../platform_lib/ASN_LIB/ARM/
+endif
+
+ifeq ($(LTE_CC), aarch64-linux-gnu-gcc)
+RUNNER_ASN_LIBDIR= -L$(RUNNER_RRC_DIR)/../platform_lib/ASN_LIB/arm64/
+endif
+RUNNER_ASN_LIBS= -lasn1per -lasn1rt
+
+
+ifeq '$(LOGGER_TYPE)' 'advanced'
+	RUNNER_OTHER_LIBS += $(ADV_LOGGING_LIBS)
+	RUNNER_OTHER_LIBS += $(IN_MEM_LGR_LIBS)
+endif
+
+#Including Logging FrameWork Library in Runner
+ifeq '$(LOG_ALM_FRWK)' 'enable'
+    RUNNER_OTHER_LIBS += $(LOGGING_FRWK_LIBS)
+endif    
+
+RUNNER_LIBS_EXT=  $(RUNNER_CSPL_LIBS) $(RUNNER_RRC_LIBS) $(RUNNER_ASN_LIBS) $(RUNNER_OTHER_LIBS) $(SCTP_OBJS) $(SCTP_LIBS) -lrt -lm 
+RUNNER_LIBS_TESTDIR= -L${TEST_LIB_DIR}
+
+#The RRC Runner binary file name	
+RUNNER_BIN= $(BINDIR)/rrc_entity
+
+#related RRC targets
+ifeq '$(LOGGER_TYPE)' 'advanced'
+RUNNER_RRC_LIBS_TARGETS= advlogger llim csc oamh common asn rrmim oamim s1apRrmim s1apim ueccmd uecc s1apOamim s1apwrap s1ap x2ap
+else
+RUNNER_RRC_LIBS_TARGETS= llim csc oamh common asn rrmim oamim s1apRrmim s1apim ueccmd uecc s1apOamim s1apwrap s1ap x2ap
+endif
+
+# M2AP Changes - Start
+ifeq '$(EMBMS_FEAT)' 'enable'
+RUNNER_RRC_LIBS_TARGETS += m2ap
+endif
+# M2AP Changes - End
+
+#Target definition
+######################################################################################
+.PHONY : all runner debug release profiler debug_with_license release_with_license clean cleanall make_dirs cspl rrc  
+
+all: runner 
+
+default: runner
+
+runner: $(MODE) $(RUNNER_BIN)
+
+$(RUNNER_CSPL_LIBS): cspl
+
+$(RUNNER_RRC_LIBS): rrc
+
+$(RUNNER_ASN_LIBS): ;
+
+ifeq '$(LOG_ALM_FRWK)' 'enable'
+    $(RUNNER_OTHER_LIBS): log_frwk
+endif
+
+$(RUNNER_OBJFILES) $(RUNNER_DRIVER_OBJFILES): lterunner.mk Makefile	
+
+driver: $(RUNNER_DRIVER_LIBS)
+
+debug: make_dirs print_build_info
+
+debug_with_license:  make_dirs print_build_info
+
+release: make_dirs print_build_info
+
+release_with_license: make_dirs print_build_info
+
+profiler: make_dirs print_build_info
+
+#Print buld inforamtion
+print_build_info:
+	@echo
+	@echo  Building with MODE=$(MODE) LOGGER_TYPE=$(LOGGER_TYPE) LOG_ALM_FRWK=$(LOG_ALM_FRWK) ENDC_FEAT=$(ENDC_FEAT)
+	
+#Make output folders
+make_dirs:
+	@echo  Creating target folders...MODE=$(MODE)
+	@mkdir -p -v $(OBJDIR)
+	@mkdir -p -v $(BINDIR)
+	@mkdir -p -v $(LIBDIR)
+
+######################################################################################
+#Build Logging Framework
+######################################################################################
+ifeq '$(LOG_ALM_FRWK)' 'enable'    
+log_frwk:
+	$(MAKE) -C ${RUNNER_ROOT}/../../common/loggingFrameWork
+endif    
+######################################################################################
+#Build CSPL
+######################################################################################
+cspl:
+	@echo  
+	@echo  Making CSPL libraries...MODE=$(MODE)
+	$(MAKE) -C $(RUNNER_CSPL_DIR)/build PORTDIR=../ports/$(RUNNER_PORT)/
+	@echo
+
+######################################################################################
+#Build Driver
+######################################################################################
+$(RUNNER_DRIVER_LIBS): $(RUNNER_DRIVER_OBJFILES)
+	@echo Linking $(notdir $<) ...
+	$(RUNNER_AR) $(RUNNER_DRIVER_LIBS) $(RUNNER_DRIVER_OBJFILES) 
+ifeq '$(MODE)' 'debug_with_license'
+	@echo Copying the LAS Library	
+	cp ../tools/las/liblas.a ../rrc/bld/$(MODE)/lib/
+endif
+
+ifeq '$(MODE)' 'release_with_license'
+	@echo Copying the LAS Library	
+	cp ../tools/las/liblas.a ../rrc/bld/$(MODE)/lib/
+endif
+
+$(RUNNER_DRIVER_OBJFILES) : $(OBJDIR)/%.o : $(RUNNER_DRIVER_SRCDIR)/%.c
+	@echo '${RUNNER_CC} ${RUNNER_DEFINES} $(RUNNER_INCLUDES) $(RUNNER_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $<' 
+	${RUNNER_CC} ${RUNNER_DEFINES} $(RUNNER_INCLUDES) $(RUNNER_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $<
+	@echo
+
+
+######################################################################################
+#Build RRC
+######################################################################################
+# M2AP Changes - Start
+rrc:
+	@echo
+	@echo  Making RRC libraries...MODE=$(MODE) LOGGER_TYPE=$(LOGGER_TYPE) LOG_ALM_FRWK=$(LOG_ALM_FRWK) ENDC_FEAT=$(ENDC_FEAT)
+	$(MAKE) -C $(RUNNER_RRC_DIR)/bld $(RUNNER_RRC_LIBS_TARGETS) \
+	MODE=$(MODE) \
+	RRC_PORT=$(RUNNER_PORT) \
+	LOGGER_TYPE=$(LOGGER_TYPE) \
+    LOG_ALM_FRWK=$(LOG_ALM_FRWK) \
+	RRC_UECC_TR_ID_CONST=$(RUNNER_RRC_UECC_TR_ID_CONST) \
+	RRC_CSC_FT=$(RUNNER_RRC_CSC_FT) \
+	SCTP_STACK=${SCTP_STACK} \
+	EMBMS_FEAT=${EMBMS_FEAT} \
+	ENDC_FEAT=$(ENDC_FEAT)
+	@echo
+# M2AP Changes - End
+######################################################################################
+#Build RRC Runner
+######################################################################################
+ifeq ($(RRC_UNIT_TEST_FRAMEWORK), 1)
+$(RUNNER_BIN): $(RUNNER_OBJFILES) $(RUNNER_LIBS_EXT) driver $(L3_SUIT_LIBS)
+	@echo Linking $(notdir $<) ... 
+	${RUNNER_CC} $(RUNNER_INCLUDES) $(RUNNER_CFLAGS) $(RUNNER_OBJFILES) $(L3_SUIT_LIBS) $(RUNNER_ASN_LIBDIR) $(RUNNER_DRIVER_LIBS) $(RUNNER_LIBS_EXT) $(CUNIT_LIBS) ../../../../TESTING/lte_rrc_ut_frwk/common/src/rrc_ut_stub_db.c ../../../../TESTING/lte_rrc_ut_frwk/common/src/rrc_ut_suite_db.c ../../../../TESTING/lte_rrc_ut_frwk/common/src/rrc_ut_stub_release_db.c ../../../../TESTING/lte_rrc_ut_frwk/common/include/rrc_ut_common.h ../../../../TESTING/lte_rrc_ut_frwk/mac_stub/src/mac_stub.c ../../../../TESTING/lte_rrc_ut_frwk/mac_stub/src/mac_stub_release.c ../../../../TESTING/lte_rrc_ut_frwk/oam_stub/src/oam_stub.c ../../../../TESTING/lte_rrc_ut_frwk/rrm_stub/src/rrm_stub.c ../../../../TESTING/lte_rrc_ut_frwk/rrm_stub/src/rrm_stub_release.c ../../../../TESTING/lte_rrc_ut_frwk/phy_stub/src/phy_stub.c ../../../../TESTING/lte_rrc_ut_frwk/phy_stub/src/phy_stub_release.c ../../../../TESTING/lte_rrc_ut_frwk/rlc_stub/src/rlc_stub.c ../../../../TESTING/lte_rrc_ut_frwk/rlc_stub/src/rlc_stub_release.c ../../../../TESTING/lte_rrc_ut_frwk/pdcp_stub/src/pdcp_stub.c ../../../../TESTING/lte_rrc_ut_frwk/pdcp_stub/src/pdcp_stub_release.c ../../../../TESTING/lte_rrc_ut_frwk/s1u_stub/src/s1u_stub.c ../../../../TESTING/lte_rrc_ut_frwk/s1u_stub/src/s1u_stub_release.c ../../../../TESTING/lte_rrc_ut_frwk/sgnb_stub/src/sgnb_stub.c ../../../../TESTING/lte_rrc_ut_frwk/mme_stub/src/mme_stub.c -lcunit -g -o $@
+	@echo  
+	@echo Build finished.
+else
+$(RUNNER_BIN): $(RUNNER_OBJFILES) $(RUNNER_LIBS_EXT) driver
+	@echo Linking $(notdir $<) ... 
+	@echo '${RUNNER_CC} $(RUNNER_INCLUDES) $(RUNNER_CFLAGS) $(RUNNER_OBJFILES) $(RUNNER_ASN_LIBDIR) $(RUNNER_DRIVER_LIBS) $(RUNNER_LIBS_TESTDIR) -lTest -ldl $(RUNNER_LIBS_EXT) -o $@'
+	${RUNNER_CC} $(RUNNER_INCLUDES) $(RUNNER_CFLAGS) $(RUNNER_OBJFILES) $(RUNNER_ASN_LIBDIR) $(RUNNER_DRIVER_LIBS) $(RUNNER_LIBS_TESTDIR) -lTest -ldl $(RUNNER_LIBS_EXT) -o $@
+	@echo  
+	@echo Build finished.
+endif
+
+$(RUNNER_OBJFILES) : $(OBJDIR)/%.o : $(RUNNER_SRCDIR)/%.c 
+	@echo '${RUNNER_CC} ${RUNNER_DEFINES} $(RUNNER_INCLUDES) $(RUNNER_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $< ' 
+	${RUNNER_CC} ${RUNNER_DEFINES} $(RUNNER_INCLUDES) $(RUNNER_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $< 
+	@echo
+
+ifeq ($(RRC_UNIT_TEST_FRAMEWORK), 1)
+$(L3_SUIT_LIBS): $(L3_SUIT_OBJFILES)
+	@echo Linking $(notdir $<) ...
+	$(RUNNER_AR) $(L3_SUIT_LIBS) $(L3_SUIT_OBJFILES)
+endif
+
+ifeq ($(RRC_UNI_TEST_FRAMEWORK), 1)
+$(L3_SUIT_OBJFILES) : $(L3_SUIT_OBJ_DIR)/%.o : $(L3_SUIT_SRC_DIR)/%.c 
+	@echo '${RUNNER_CC} ${RUNNER_DEFINES} $(RUNNER_INCLUDES) $(L3_SUIT_INCLUDES) $(RUNNER_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $< ' 
+	${RUNNER_CC} ${RUNNER_DEFINES} $(RUNNER_INCLUDES) $(L3_SUIT_INCLUDES) $(RUNNER_CFLAGS) -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o $@ $< 
+	@echo
+endif
+
+######################################################################################
+#Clean the RRC Runner related files
+######################################################################################
+clean:
+	@echo Cleaning Runner
+	$(RUNNER_RM) -r debug
+	$(RUNNER_RM) -r debug_with_license
+	$(RUNNER_RM) -r profiler
+	$(RUNNER_RM) -r release
+	$(RUNNER_RM) -r release_with_license
+	$(RUNNER_RM) -r report
+
+######################################################################################
+#Clean all files, include RRC and CSPL related files
+######################################################################################
+cleanall: clean
+	@echo Cleaning CSPL libraries... 
+	$(MAKE) -C ../cspl/build clean
+	@echo Cleaning RRC libraries...
+	$(MAKE) -C ../rrc/bld clean
+ifeq ($(RRC_UNIT_TEST_FRAMEWORK), 1)
+	@echo Cleaning unit test suit library...
+	$(MAKE) -C ../l3_aut_suite clean
+endif
+	@echo Cleaning advanced logger library...
+	$(MAKE) -C ../tools/advlogger distclean
+
+#For Make file debugging purposes
+print_dbg:
+	@echo "$(RUNNER_)"
+	@echo "$(OBJDIR)"
+	@echo "$(BINDIR)"
+	@echo $(RUNNER_COMMON_INCLUDES)
+	@echo $(RUNNER_INCLUDES)
+	@echo $(RUNNER_DEFINES)
+	@echo $(RUNNER_CFLAGS)
+	@echo $(RUNNER_OBJFILES)
+	@echo $(RUNNER_LIBS)
+	@echo $(RUNNER_LIBDIR)
+	@echo $(RUNNER_BIN)
+

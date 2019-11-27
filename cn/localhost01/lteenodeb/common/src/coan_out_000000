@@ -1,0 +1,167 @@
+/***************************************************************************
+ *
+ *  ARICENT -
+ *
+ *  Copyright (c) Aricent.
+ *
+ ****************************************************************************
+ *
+ *  $Id: lteMacStatsManager.c
+ *
+ ****************************************************************************
+ *
+ *  File Description : This file contains the functionality that is invoked 
+ *                     from execution scheduler to obtain downlink and uplink
+ *                     stats in the file.
+ *
+ ****************************************************************************
+ *
+ * Revision Details
+ * ----------------
+ *$Log: lteMacStatsManager.c,v $
+ *Revision 1.1.1.1.6.1.6.3  2010/10/25 08:36:31  gur23971
+ *stats related changes
+ *
+ *Revision 1.1.1.1.6.1.6.2  2010/10/22 12:44:10  gur04640
+ *Statistics code merged from branch BRFramework_RRC1_0_RLC_AM_MAC_8_8_FAPI_optimizations
+ *
+ *Revision 1.1.1.1.6.1.6.1  2010/10/11 12:56:56  gur10121
+ *SPR #706 fix
+ *Revision 1.1.1.1.6.1.8.3  2010/10/22 06:12:03  gur04640
+ *FAPI and per TTI stats implemented
+ *
+ *Revision 1.1.1.1.6.1.10.1  2010/10/08 07:42:39  gur10121
+ * SPR 706 Fix - KlockWork Warnings removed
+ *Revision 1.1.1.1.6.1.8.2  2010/10/20 10:24:38  gur04640
+ *FAPI specific PHY interface stats added
+ *
+ *Revision 1.1.1.1.6.1.8.1  2010/10/13 10:59:37  gur04640
+ *Changes done for implementing Stats using shared memory
+ *
+ *Revision 1.1.1.1.6.1.8.1  2010/10/12 02:45:30  gur04640
+ *Changes done for implementing Stats using shared memory
+ *
+ *Revision 1.1.1.1.6.1  2010/08/02 08:13:42  gur20491
+ *FrameworkSetupWith1.0_MAC1.2.4
+ *
+ *Revision 1.24  2009/11/15 12:57:25  gur11912
+ *LTE_MAC_UT_LOG(LOG_WARNING) used instead of lteWarning
+ *
+ *Revision 1.23  2009/11/11 13:02:49  gur19413
+ *file name changed -> DownlinkstatsInfo to downlinkstatsInfo
+ *
+ *Revision 1.22  2009/11/02 05:33:40  gur11912
+ *updated for RA Policy
+ *
+ *Revision 1.21  2009/11/01 11:42:19  gur11912
+ *RBBitMap printed in Hexadecimal format
+ *
+ *Revision 1.20  2009/10/25 11:10:46  gur11912
+ *DL and UL stats functionality separated
+ *
+ *Revision 1.19  2009/10/21 05:58:19  gur19413
+ *optimized stats functionality
+ *
+ *Revision 1.18  2009/09/03 14:27:44  gur19413
+ *bug fixed
+ *
+ *Revision 1.17  2009/09/02 19:24:55  gur19413
+ *bug fixed
+ *
+ *Revision 1.16  2009/09/02 13:49:46  gur19413
+ *bug fixed
+ *
+ *Revision 1.15  2009/09/02 13:32:07  gur19413
+ *bug fixed for customized file name
+ *
+ *Revision 1.14  2009/08/28 13:33:10  gur19413
+ *bug fixed
+ *
+ *Revision 1.13  2009/08/28 13:29:38  gur19413
+ *replace older logger system to new one
+ *
+ *Revision 1.12  2009/08/21 10:48:06  gur19413
+ *bug fixed
+ *
+ *Revision 1.11  2009/08/20 06:42:55  gur19413
+ *added stat functionality for PRACH and PUCCH Reports
+ *
+ *Revision 1.10  2009/08/03 10:38:24  gur11083
+ *changed for multiple UE stats for UL/DL
+ *
+ *
+ ****************************************************************************/
+
+
+/****************************************************************************
+ * Standard Library Includes
+ ****************************************************************************/
+
+
+
+/****************************************************************************
+ * Project Includes
+ ****************************************************************************/
+#include <stddef.h>
+#include <lteMisc.h>
+#include "lteCommonStatsManager.h"
+//#include "lteMacStatsManager.h"
+//#include "lteMacTypes.h"
+//#include "lteFapiMacPhyInterface.h"
+/*spr 22474 start*/
+    /*CSPL Code removed*/
+/*spr 22474 end*/
+
+/****************************************************************************
+ Private Definitions
+ ****************************************************************************/
+/* Since max size of DL CONFIG msg is 65535, and the minimum size of one pdu
+ * is 12, so the maximumnumber of PDUs possible in one request are
+ * 65536/12 = 5462 */
+#define LTE_MAC_STATS_MAX_PDU   5462
+
+/* CA Stats Changes Start */
+/* + PERF_CA GBL */
+#define LTE_MAC_STATS_RF_TTI_STATS(internalcellIndex) gMacStats.pStats->\
+            phyStats[internalcellIndex].radioFrameStats \
+            .ttiStats[lLteMacStatsRfMulFactor_g*MAX_SFN_VALUE + \
+            lLteMacStatsRfSfn_g[internalcellIndex] % LTE_MAC_STATS_MAX_SFN][lLteMacStatsRfSf_g[internalcellIndex]]
+/* - PERF_CA GBL */
+/* CA Stats Changes End */
+
+#ifdef CYCLE_COUNT_MAC_RLC_PDCP
+/* CA Stats Changes Start */
+#define LTE_MAC_STATS_CC_ITERATOR(internalCellIndex) (gMacStats.pStats->ccIterator[(internalCellIndex)]) 
+/* CA Stats Changes End */
+#endif
+LteMacStatsInfo gMacStats;
+/* SPR23194 Start */
+UInt8 kpiLcToQciMapping_g[MAX_LCID_THP];
+/* SPR23194 End */
+UInt8 Mimo_NonMimo_Flag_g = 0;
+/* CA Stats Changes Start */
+
+
+#ifdef DL_UL_SPLIT
+extern void lteMacUpdateStatsPerfEnd(UInt32, InternalCellIndex);
+#else
+extern void lteMacUpdateStatsPerfEnd(InternalCellIndex);
+#endif
+
+#ifdef DL_DATA_SEPARATION
+extern void lteMacUpdateEncoderStatsPerfEnd(InternalCellIndex internalCellIndex);
+#endif
+/* CA Stats Changes End */
+
+
+/****************************************************************************
+ Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+/* + PERF_CA GBL */
+UInt16   lLteMacStatsRfSfn_g[MAX_NUM_CELL] = {0};
+UInt16   lLteMacStatsRfSf_g[MAX_NUM_CELL] = {0};
+/* - PERF_CA GBL */

@@ -1,0 +1,50 @@
+#/**************************************************************************
+#** FILE NAME  :
+#**               Makefile for GW
+#**# description :
+#**            Makefile for GATEWAY shAREDF mODULE
+#**  DATE     NAME              REFERENCE         REASON
+#**  ----     ----              ---------         ------
+#**  13Oct2002  Anjali     -----            Create Original
+#**
+#**    Copyright (C) 2006 Aricent Inc . All Rights Reserved
+#******************************************************************************/
+GW_DIR = $(SIGTRAN_DIR)/common/gw
+
+all         : setup objs
+
+setup       :
+		if [-d $(GW_DIR)/obj] ; \
+                then \
+                   echo "Dir Exists" ; \
+                else \
+                   mkdir -p $(GW_DIR)/obj ; \
+                fi
+		if [-d $(GW_DIR)/obj/$(CPU)] ; \
+                then \
+                   echo "Dir Exists" ; \
+                else \
+                   mkdir -p $(GW_DIR)/obj/$(CPU) ; \
+                fi
+objs         :
+		cd $(GW_DIR)/genlib/make/solaris; \
+		make -f makegl_os gl_tm_mt; \
+		make -f makegl_os gl_gscim_mt; \
+                make -f makegl_os gl_mm_mt; \
+                make -f makegl_db gl_htm_mt; \
+		make -f makegl_os gl_tmport; \
+	        make -f makegl_cmn gl_ulm; \
+	        cd $(GW_DIR)/obj/$(CPU);\
+	       $(LTE_AR)  -x $(GW_DIR)/lib/solaris/libgl_tm_mtl.a;\
+		$(LTE_AR) -x $(GW_DIR)/lib/solaris/libgl_mm_mtl.a; \
+		$(LTE_AR) -x $(GW_DIR)/lib/solaris/libgl_gscim_mtl.a ;\
+		$(LTE_AR) -x $(GW_DIR)/lib/solaris/libgl_tmportl.a ;\
+		$(LTE_AR) -x $(GW_DIR)/lib/solaris/libgl_ulml.a  ;\
+		$(LTE_AR) -x $(GW_DIR)/lib/solaris/libgl_htm_mtl.a  ;\
+		$(LTE_AR) -r libgl.a $(GW_DIR)/obj/$(CPU)/*.o;\
+		rm -fr *.o
+
+clean          :
+		cd $(GW_DIR)/obj/$(CPU); \
+                rm -f libgl.a 
+

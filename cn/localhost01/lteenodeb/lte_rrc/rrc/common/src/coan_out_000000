@@ -1,0 +1,77 @@
+/******************************************************************************
+*
+*   FILE NAME:
+*       rrc_common_utils.c
+*
+*   DESCRIPTION:
+*       This is the main file of the bridge module. This module provides
+*       the bridge between RRC layer and external libraries (CSPL, logger etc).
+*
+*   DATE            AUTHOR      REFERENCE       REASON
+*   31 Mar 2009     VasylN      ---------       Initial
+*
+*   Copyright (c) 2009, Aricent Inc. All Rights Reserved
+*
+******************************************************************************/
+#include <cspl.h>
+#include <stacklayer.h>
+#include "rrc_common_utils.h"
+#include "rrc_msg_mgmt.h"
+#include "rrc_ext_api.h"
+#include "s1ap_api.h"
+#include "x2ap_api.h"
+#include "rrc_logging.h"
+/* SPR 16017 Fix Start */ 
+#include "uecc_logger.h"
+/* SPR 16017 Fix Stop */ 
+
+
+#ifdef RRC_UNIT_TEST_FRAMEWORK
+#include "rrc_ut_stub_db.h"
+#endif
+
+
+/*SPR_19937_START*/
+#include "rrc_oamh_intf.h"
+#include "rrc_rrm_intf.h"
+#include "rrc_uecc_llim_intf.h"
+#include "rrc_x2ap_uecc_intf.h"
+/*SPR_19937_END*/
+U32 length_read_g = 0;
+/* SPR 1643 Start */
+#define MAX_VAL_DIGIT          0x09
+
+#define IS_VALID_PLMN(x) \
+   ((((x) & 0x0F) <= MAX_VAL_DIGIT) && (((x) >> 0x04) <= MAX_VAL_DIGIT))
+
+
+#define IS_VALID_PLMN_FILLER(x) \
+   ((((x) >> 0x04) <= MAX_VAL_DIGIT) || (((x) >> 0x04) == 0xF))
+
+/* SPR 1643 Stop */
+
+/*
+*   Global variables
+*/
+
+/* Used in logger for identifying RRC in general
+ *  (just for avoid string duplication) */
+const S8* rrc_log_facility_name = (const S8*)"eNodeB RRC";
+/*Lockless Implementation start*/
+#ifdef LOCKLESS_IMPL
+QLOCK  rrc_lock  = PNULL;
+QLOCK  s1ap_lock = PNULL;
+QLOCK  x2ap_lock = PNULL;
+#else
+extern QLOCK  rrc_lock;
+extern QLOCK  s1ap_lock;
+extern QLOCK  x2ap_lock;
+#endif
+/*Lockless Implementation stop*/
+
+/*Bug 9305 start*/
+U32 rrc_health_monitor_val[RRC_MAX_THREADS] = {0};
+U32 s1ap_health_monitor_val[S1AP_SCTP_MAX_THREADS] = {0};
+U32 x2ap_health_monitor_val = 0;
+/*Bug 9305 end*/
+

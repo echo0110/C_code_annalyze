@@ -1,0 +1,763 @@
+/****************************************************************************
+*
+* ARICENT -
+*
+* Copyright (C) 2012 Aricent Inc. All Rights Reserved.
+*
+****************************************************************************
+*
+* SPR-612 Coverity Fix Starts
+* $Id: son_utils.c $
+* SPR-612 Coverity Fix Ends
+*
+****************************************************************************
+*
+* File Description: This file contains the function definitions which are
+*                   common to various SON modules. It includes APIs to
+*                   compose, pack, unpack, alloc and send the message,
+*                   compose the CSPL header etc.
+*
+****************************************************************************
+* Revision Details
+*----------------------
+*   DATE            AUTHOR      REFERENCE       REASON
+*   April, 2012     Gautam Shah/Shilpi Jain     Initial Code
+*   July, 2014      Shilpi                      SPR 12708 Fix 
+*   July, 2014      Shilpi                      SPR 10331 Fix
+*   Aug, 2014       Shilpi                      SPR 13251 Fix
+****************************************************************************/
+
+/****************************************************************************
+* Project Includes
+****************************************************************************/
+#include <son_utils.h>
+#include <son_oam_composer.h>
+#include <son_types.h>
+#include <son_mif_msg_handler.h>
+#include <x2ap_api.h>
+#include <math.h>
+#include <pthread.h>
+
+/****************************************************************************
+* Macro Definitions
+****************************************************************************/
+#define FMT_MAX_LEN 255
+#define UNKNOWN_API_NAME "UNKNOWN_API_ID"
+#define UNKNOWN_MODULE "UNKNOWN_MODULE_ID"
+/*SPR 22554 Fix Start*/
+#define SON_THREAD_NAME_LEN 20
+/*SPR 22554 Fix End*/
+/****************************************************************************
+ * Global Variables 
+ ****************************************************************************/
+
+extern son_global_config_params_t g_config_params;
+/* Rel 3.0 Cell delete support changes Start */
+son_s16 temp_txn_id_list[SON_MAX_TEMP_TXN_ID] = {[0 ... (SON_MAX_TEMP_TXN_ID - 1)] = -1};
+/* Rel 3.0 Cell delete support changes Stop */
+
+const QMANIFEST *p_manifest[] = {
+    &son_manifest_mif,
+    &son_manifest_apps,
+    &son_manifest_es,
+    &son_manifest_anr,
+    &son_manifest_nmm,
+    &son_manifest_x2,
+#ifdef SON_MRO_FEATURE
+    &son_manifest_mro,
+#endif
+    &son_manifest_mlb,
+    &son_manifest_rach_opt
+
+};
+/*coverity 19361 fix start*/
+const son_s8 *p_son_log_level_names[] =
+{
+    /* Typecasting strings to const son_s8 pointers to remove klocwork
+     * warnings. */
+    (const son_s8 *)"SON_OAM_LOG_LEVEL_CRITICAL",
+    (const son_s8 *)"SON_OAM_LOG_LEVEL_ERROR",
+    (const son_s8 *)"SON_OAM_LOG_LEVEL_WARNING",
+    (const son_s8 *)"SON_OAM_LOG_LEVEL_INFO",
+    (const son_s8 *)"SON_OAM_LOG_LEVEL_BRIEF",
+    (const son_s8 *)"SON_OAM_LOG_LEVEL_DETAILED",
+    (const son_s8 *)"SON_OAM_LOG_LEVEL_DETAILEDALL",
+    (const son_s8 *)"SON_LOG_LEVEL_NONE"
+};
+/*coverity 19361 fix end*/
+
+/*  SON_MODE_NAMES- Stores son_mode_et enum possible values as
+ *  strings */
+const son_s8 *SON_MODE_NAMES[] =
+{
+    (const son_s8 *)"SON_MODE_DISTRIBUTED",
+    (const son_s8 *)"SON_MODE_CENTRALIZED",
+    (const son_s8 *)"NOT_AVAILABLE"
+};
+
+/* Bug 121 Fix Start */
+/* SON internal Module Names */
+const son_s8 *SON_INTERNAL_MODULE_NAMES[] = 
+{
+    (const son_s8 *)"SON_MIF",
+    (const son_s8 *)"SON_APPS",
+    (const son_s8 *)"SON_ANR",
+    (const son_s8 *)"SON_ES",
+    (const son_s8 *)"SON_NMM",
+    (const son_s8 *)"SON_MRO",
+    (const son_s8 *)"SON_MLB",
+    (const son_s8 *)"SON_RACH",
+    (const son_s8 *)"SON_LOGGER",
+    (const son_s8 *)"SON_X2",
+    (const son_s8 *)"SON_MODULE_NAME_NOT_AVAILABLE",
+};
+
+const son_s8* SON_EXTERNAL_MODULE_NAMES[] = 
+{
+    (const son_s8 *)"SON_OAM_MODULE_ID",
+    (const son_s8 *)"SON_RRM_MODULE_ID",
+    (const son_s8 *)"SON_RRC_MODULE_ID",
+    (const son_s8 *)"SON_PHY_MODULE_ID"
+};
+
+const son_s8* SON_X2AP_API_NAMES[] = 
+{
+    (const son_s8 *)"X2AP_ENB_CONFIG_UPDATE_REQ",
+    (const son_s8 *)"X2AP_ENB_CONFIG_UPDATE_RES",
+    (const son_s8 *)"X2AP_ENB_CONFIG_UPDATE_IND",
+    (const son_s8 *)"X2AP_RESET_REQ",
+    (const son_s8 *)"X2AP_RESET_RES",
+    (const son_s8 *)"X2AP_RESET_IND",
+    (const son_s8 *)"X2AP_RLF_IND",
+    (const son_s8 *)"X2AP_ENB_LINK_UP_IND",
+    (const son_s8 *)"X2AP_ENB_LINK_DOWN_IND",
+    (const son_s8 *)"X2AP_ENB_CONFIG_UPDATE_WAIT_IND",
+    (const son_s8 *)"X2AP_HO_REPORT_IND",
+    (const son_s8 *)"X2AP_PEER_CELL_ACTIVATION_REQ",
+    (const son_s8 *)"X2AP_PEER_CELL_ACTIVATION_RESP",
+    (const son_s8 *)"X2AP_CELL_ACTIVATION_REQ",
+    (const son_s8 *)"X2AP_CELL_ACTIVATION_RESP",
+    (const son_s8 *)"X2AP_MOBILITY_CHANGE_REQ",
+    (const son_s8 *)"X2AP_MOBILITY_CHANGE_RESP",
+    (const son_s8 *)"X2AP_MOBILITY_SETTING_CHANGE_REQ",
+    (const son_s8 *)"X2AP_MOBILITY_SETTING_CHANGE_RESP"
+};
+
+const son_s8* SON_RRC_API_NAMES[] = 
+{
+    (const son_s8 *)"X2AP_ADD_ENB_REQ",
+    (const son_s8 *)"X2AP_ADD_ENB_RES",
+    (const son_s8 *)"X2AP_DEL_ENB_REQ",
+    (const son_s8 *)"X2AP_DEL_ENB_RES"
+};
+
+const son_s8* RRM_SON_API_NAME[] =
+{
+    (const son_s8 *)"RRM_SON_REGISTER_REQ",
+    (const son_s8 *)"RRM_SON_DEREGISTER_REQ",
+    (const son_s8 *)"RRM_SON_SET_ATTRIBUTE_REQ",
+    (const son_s8 *)"RRM_SON_CELL_SWITCH_ON_REQ",
+    (const son_s8 *)"RRM_SON_CELL_SWITCH_OFF_REQ",
+    (const son_s8 *)"RRM_SON_NMM_PREPARE_REQ",
+    (const son_s8 *)"RRM_SON_NMM_COMPLETE_REQ",
+    (const son_s8 *)"RRM_SON_MEAS_CONFIG_REQ",
+    (const son_s8 *)"RRM_SON_TNL_DISCOVERY_REQ",
+    (const son_s8 *)"RRM_SON_MEAS_CONFIG_OBJ_REMOVE_REQ",
+    (const son_s8 *)"RRM_SON_RACH_CONFIG_REQ",
+    (const son_s8 *)"RRM_SON_ENB_CONFIG_UPDATE_IND"
+};
+
+const son_s8* SON_RRM_API_NAME[] =
+{
+    (const son_s8 *)"RRM_SON_REGISTER_RESP",
+    (const son_s8 *)"RRM_SON_DEREGISTER_RESP",
+    (const son_s8 *)"RRM_SON_SET_ATTRIBUTE_RESP",
+    (const son_s8 *)"RRM_SON_CELL_SWITCH_ON_RESP",
+    (const son_s8 *)"RRM_SON_CELL_SWITCH_OFF_RESP",
+    (const son_s8 *)"RRM_SON_CELL_STATE_CHANGE_IND",
+    (const son_s8 *)"RRM_SON_NUM_ACTIVE_UE_REPORT",
+    (const son_s8 *)"RRM_UE_COUNT_THRESHOLD_REACHED_IND",
+    (const son_s8 *)"RRM_SON_NMM_PREPARE_RESP",
+    (const son_s8 *)"RRM_SON_NMM_COMPLETE_RESP",
+    (const son_s8 *)"RRM_SON_MEAS_CONFIG_RESP",
+    (const son_s8 *)"RRM_SON_MEAS_RESULTS_IND",
+    (const son_s8 *)"RRM_SON_HO_REPORT",
+    (const son_s8 *)"RRM_SON_TNL_DISCOVERY_RESP",
+    (const son_s8 *)"RRM_SON_HO_ATTEMPT_IND",
+    (const son_s8 *)"RRM_SON_HO_FAILURE_REPORT",
+    (const son_s8 *)"RRM_SON_LOAD_REPORT_IND",
+    (const son_s8 *)"RRM_SON_HO_EXPIRE_IND",
+    (const son_s8 *)"RRM_SON_MEAS_CONFIG_OBJ_REMOVE_RESP",
+    (const son_s8 *)"RRM_SON_RACH_CONFIG_RESP",
+    (const son_s8 *)"RRM_SON_RACH_UE_INFO_IND",
+    (const son_s8 *)"RRM_SON_L2_RACH_PERF_REPORT",
+    (const son_s8 *)"RRM_SON_EICIC_ENABLE_DISABLE_IND"
+};
+
+const son_s8 *SON_PROCEDURE_CODE_NAMES[] = 
+{
+    (const son_s8 *)"SONNMM_INIT_IND",
+    (const son_s8 *)"SONNMM_START_SCAN_REQ",
+    (const son_s8 *)"SONNMM_PERIODIC_SCAN_REQ",
+    (const son_s8 *)"SONNMM_STOP_SCAN_REQ",
+    (const son_s8 *)"SONNMM_START_SCAN_RES",
+    (const son_s8 *)"SONNMM_STOP_SCAN_RES",
+    (const son_s8 *)"SONNMM_LAST_SCAN_TIMESTAMP_IND",
+    (const son_s8 *)"SONANR_ENABLE_REQ",
+    (const son_s8 *)"SONANR_DISABLE_REQ",
+    (const son_s8 *)"SONANR_NR_ADD_REQ",
+    (const son_s8 *)"SONANR_NR_DELETE_REQ",
+    (const son_s8 *)"SONANR_NR_UPDATE_REQ",
+    (const son_s8 *)"SONANR_NR_RETRIEVE_REQ",
+    (const son_s8 *)"SONANR_NR_SCAN_REQ",
+    (const son_s8 *)"SONANR_MEAS_CONFIG_REQ",
+    (const son_s8 *)"SONANR_PCI_REG_DEREG_REQ",
+    (const son_s8 *)"SONANR_PCI_IN_USE_LIST_REQ",
+    (const son_s8 *)"SONANR_MODIFY_UE_COUNT_REQ",
+    (const son_s8 *)"SONANR_MODIFY_MEAS_REPORTING_INTERVAL_REQ",
+    (const son_s8 *)"SONANR_NR_DELETE_FROM_REMOVE_LIST_REQ",
+    (const son_s8 *)"SONANR_MODIFY_REMOVAL_ATTRIBUTES_REQ",
+    (const son_s8 *)"SONANR_MODIFY_PCI_CONFUSION_CFG_REQ",
+    (const son_s8 *)"SONANR_ENABLE_DISABLE_X2_REQ",
+    (const son_s8 *)"SONANR_ENABLE_DISABLE_LIMITED_MODE_REQ",
+    (const son_s8 *)"SONANR_NR_ENB_ADD_REQ",
+    (const son_s8 *)"SONANR_NR_ENB_UPDATE_REQ",
+    (const son_s8 *)"SONANR_NR_ENB_DELETE_REQ",
+    (const son_s8 *)"SONANR_NR_ENB_RETRIEVE_REQ",
+    (const son_s8 *)"SONANR_NEIGHBOR_DEFAULT_CONFIG_REQ",
+    /* SPR-10331 Fix Starts */
+    /* Line Deleted */
+    /* SPR-10331 Fix Ends */
+    (const son_s8 *)"SONANR_MEAS_CONFIG_OBJ_REMOVE_REQ",
+    /* SPR 20653 Fix Start */
+    (const son_s8 *)"SONANR_MODIFY_ATTRIBUTE_REQ",
+    /* SPR 20653 Fix End */
+    (const son_s8 *)"SONANR_ENABLE_RES",
+    (const son_s8 *)"SONANR_DISABLE_RES",
+    (const son_s8 *)"SONANR_NR_ADD_RES",
+    (const son_s8 *)"SONANR_NR_DELETE_RES",
+    (const son_s8 *)"SONANR_NR_UPDATE_RES",
+    (const son_s8 *)"SONANR_NR_RETRIEVE_RES",
+    (const son_s8 *)"SONANR_NR_SCAN_RES",
+    (const son_s8 *)"SONANR_MEAS_CONFIG_RES",
+    (const son_s8 *)"SONANR_PCI_REG_DEREG_RES",
+    (const son_s8 *)"SONANR_PCI_IN_USE_LIST_RES",
+    (const son_s8 *)"SONANR_PCI_CONFLICT_CONFUSION_IND",
+    (const son_s8 *)"SONANR_UPDATED_NRT_INFO",
+    (const son_s8 *)"SONANR_MODIFY_UE_COUNT_RES",
+    (const son_s8 *)"SONANR_MODIFY_MEAS_REPORTING_INTERVAL_RES",
+    (const son_s8 *)"SONANR_NR_DELETE_FROM_REMOVE_LIST_RES",
+    (const son_s8 *)"SONANR_MODIFY_REMOVAL_ATTRIBUTES_RES",
+    (const son_s8 *)"SONANR_MODIFY_PCI_CONFUSION_CFG_RES",
+    (const son_s8 *)"SONANR_ENABLE_DISABLE_X2_RES",
+    (const son_s8 *)"SONANR_ENABLE_DISABLE_LIMITED_MODE_RES",
+    (const son_s8 *)"SONANR_NR_ENB_ADD_RESP",
+    (const son_s8 *)"SONANR_NR_ENB_UPDATE_RESP",
+    (const son_s8 *)"SONANR_NR_ENB_DELETE_RESP",
+    (const son_s8 *)"SONANR_NR_ENB_RETRIEVE_RESP",
+    (const son_s8 *)"SONANR_LIMITED_MODE_PCI_INFO",
+    (const son_s8 *)"SONANR_FEATURE_STATE_CHANGE_IND",
+    (const son_s8 *)"SONANR_DISABLE_IND",
+    (const son_s8 *)"SONANR_NEIGHBOR_DEFAULT_CONFIG_RESP",
+    /* SPR-10331 Fix Starts */
+    /* Line Deleted */
+    /* SPR-10331 Fix Ends */
+    (const son_s8 *)"SONANR_MEAS_CONFIG_OBJ_REMOVE_RES",
+    /* SPR 20653 Fix Start */
+    (const son_s8 *)"SONANR_MODIFY_ATTRIBUTE_RES",
+    /* SPR 20653 Fix End */
+    (const son_s8 *)"SONES_ENABLE_REQ",
+    (const son_s8 *)"SONES_DISABLE_REQ",
+    (const son_s8 *)"SONES_MODIFY_UE_COUNT_INTERVAL_REQ",
+    (const son_s8 *)"SONES_MODIFY_UE_COUNT_THRESHOLD_REQ",
+    (const son_s8 *)"SONES_CELL_SWITCH_ON_REQ",
+    (const son_s8 *)"SONES_CELL_SWITCH_OFF_REQ",
+    (const son_s8 *)"SONES_SWITCHED_OFF_CELL_INFO_REQ",
+    (const son_s8 *)"SONES_AUTONOMOUS_SWITCH_OFF_CONFIG_REQ",
+    (const son_s8 *)"SONES_FEATURE_STATE_CHANGE_IND",
+    /* SPR_19619 start */
+    (const son_s8 *)"SONES_PEER_CELL_ACTIVATION_REQ",
+    /* SPR_19619 stop */
+    (const son_s8 *)"SONES_ENABLE_RES",
+    (const son_s8 *)"SONES_DISABLE_RES",
+    (const son_s8 *)"SONES_MODIFY_UE_COUNT_INTERVAL_RES",
+    (const son_s8 *)"SONES_MODIFY_UE_COUNT_THRESHOLD_RES",
+    (const son_s8 *)"SONES_CELL_SWITCH_ON_RES",
+    (const son_s8 *)"SONES_CELL_SWITCH_OFF_RES",
+    (const son_s8 *)"SONES_SWITCHED_OFF_CELL_INFO_RES",
+    (const son_s8 *)"SONES_AUTONOMOUS_SWITCH_OFF_CONFIG_RESP",
+    (const son_s8 *)"SONES_ACTIVE_UE_COUNT_REPORT",
+    (const son_s8 *)"SONES_THRESHOLD_HIT_IND",
+    (const son_s8 *)"SONES_REQUEST_TO_SWITCH_ON_CELL",
+    (const son_s8 *)"SONES_CELL_SWITCH_ON_OFF_IND",
+    (const son_s8 *)"SONAPPS_NW_SCAN_REQ",
+    (const son_s8 *)"SONAPPS_CARRIER_FREQ_SELECTION_REQ",
+    (const son_s8 *)"SONAPPS_PCI_CONFLICT_ENABLE_DISABLE_REQ",
+    (const son_s8 *)"SONAPPS_PCI_SELECTION_REQ",
+    (const son_s8 *)"SONAPPS_PCI_RESELECTION_REQ",
+    (const son_s8 *)"SONAPPS_PERIODIC_NW_SCAN_REQ",
+    (const son_s8 *)"SONAPPS_CARRIER_FREQ_AND_DL_TX_POWER_REQ",
+    (const son_s8 *)"SONAPPS_NW_SCAN_RES",
+    (const son_s8 *)"SONAPPS_CARRIER_FREQ_SELECTION_RES",
+    (const son_s8 *)"SONAPPS_PCI_CONFLICT_ENABLE_DISABLE_RES",
+    (const son_s8 *)"SONAPPS_PCI_SELECTION_RES",
+    (const son_s8 *)"SONAPPS_PCI_RESELECTION_RES",
+    (const son_s8 *)"SONAPPS_PCI_CONFLICT_CONFUSION_IND",
+    (const son_s8 *)"SONAPPS_CARRIER_FREQ_AND_DL_TX_POWER_RESP",
+    (const son_s8 *)"SONMRO_ENABLE_REQ",
+    (const son_s8 *)"SONMRO_DISABLE_REQ",
+    (const son_s8 *)"SONMRO_MODIFY_CONFIG_PARAM_REQ",
+    (const son_s8 *)"SONMRO_ENABLE_RES",
+    (const son_s8 *)"SONMRO_DISABLE_RES",
+    (const son_s8 *)"SONMRO_MODIFY_CONFIG_PARAM_RES",
+    (const son_s8 *)"SONMRO_EUTRAN_TTT_UPDATE_IND",
+    (const son_s8 *)"SONMRO_FEATURE_STATE_CHANGE_IND",
+    (const son_s8 *)"SONMRO_HO_COUNTER_REPORT",
+    (const son_s8 *)"SONMRO_OPTIMIZATION_NOTIFICATION",
+    (const son_s8 *)"SONMLB_ENABLE_REQ",
+    (const son_s8 *)"SONMLB_DISABLE_REQ",
+    (const son_s8 *)"SONMLB_MODIFY_ATTRIBUTES_REQ",
+    (const son_s8 *)"SONMLB_MOBILITY_CHANGE_REQ",
+    (const son_s8 *)"SONMLB_OFFSET_CHANGE_REQ",
+    (const son_s8 *)"SONMLB_PEER_OFFSET_CHANGE_RESP",
+    /*Rel 3.0 Multi Sector code changes Start*/
+    (const son_s8 *)"SONMLB_INTERNAL_MOBILITY_CHANGE_REQ",
+    /*Rel 3.0 Multi Sector code changes Stop*/
+    (const son_s8 *)"SONMLB_ENABLE_RES",
+    (const son_s8 *)"SONMLB_DISABLE_RES",
+    (const son_s8 *)"SONMLB_MODIFY_ATTRIBUTES_RES",
+    (const son_s8 *)"SONMLB_MOBILITY_CHANGE_ACK",
+    (const son_s8 *)"SONMLB_MOBILITY_CHANGE_FAILURE",
+    (const son_s8 *)"SONMLB_FEATURE_STATE_CHANGE_IND",
+    (const son_s8 *)"SONMLB_HO_LOAD_PRARAMS_INFO",
+    (const son_s8 *)"SONMLB_OFFSET_CHANGE_RESP",
+    (const son_s8 *)"SONMLB_PEER_OFFSET_CHANGE_REQ",
+    (const son_s8 *)"SONMLB_NBR_CELL_STATUS_IND",
+    /*Rel 3.0 Multi Sector code changes Start*/
+    (const son_s8 *)"SONMLB_INTERNAL_MOBILITY_CHANGE_ACK",
+    (const son_s8 *)"SONMLB_INTERNAL_MOBILITY_CHANGE_FAILURE",
+    /*Rel 3.0 Multi Sector code changes Stop*/
+    (const son_s8 *)"SONRACH_OPT_ENABLE_REQ",
+    (const son_s8 *)"SONRACH_OPT_DISABLE_REQ",
+    (const son_s8 *)"SONRACH_OPT_MODIFY_CONFIG_PARAMS_REQ",
+    (const son_s8 *)"SONRACH_OPT_MODIFY_RACH_OPTMODE_REQ",
+    (const son_s8 *)"SONRACH_OPT_ENABLE_RES",
+    (const son_s8 *)"SONRACH_OPT_DISABLE_RES",
+    (const son_s8 *)"SONRACH_OPT_MODIFY_CONFIG_PARAMS_RES",
+    (const son_s8 *)"SONRACH_OPT_MODIFY_RACH_OPTMODE_RES",
+    (const son_s8 *)"SONRACH_OPT_PARAMETER_UPDATE_REQ",
+    (const son_s8 *)"SONRACH_OPT_FAILURE_NOTIFICATION",
+    (const son_s8 *)"SONRACH_OPT_UE_INFO_REPORT",
+    (const son_s8 *)"SONRACH_OPT_L2_PERF_REPORT",
+    (const son_s8 *)"SONRACH_OPT_FEATURE_STATE_CHANGE_IND",
+    (const son_s8 *)"SON_OAM_INIT_IND",
+    (const son_s8 *)"SON_OAM_INIT_CONFIG_REQ",
+    (const son_s8 *)"SON_OAM_INIT_CONFIG_RESP",
+    (const son_s8 *)"SON_OAM_SHUTDOWN_REQ",
+    (const son_s8 *)"SON_OAM_SHUTDOWN_RESP",
+    (const son_s8 *)"SON_OAM_SET_LOG_LEVEL_REQ",
+    (const son_s8 *)"SON_OAM_SET_LOG_LEVEL_RESP",
+    (const son_s8 *)"SON_OAM_LOG_ENABLE_DISABLE_REQ",
+    (const son_s8 *)"SON_OAM_LOG_ENABLE_DISABLE_RESP",
+    (const son_s8 *)"SON_OAM_CELL_INFO_IND",
+    (const son_s8 *)"SON_OAM_ENABLE_DISABLE_X2_REQ",
+    (const son_s8 *)"SON_OAM_ENABLE_DISABLE_X2_RESP",
+    (const son_s8 *)"SON_OAM_X2_LINK_UP_IND",
+    (const son_s8 *)"SON_OAM_X2_LINK_DOWN_IND",
+    (const son_s8 *)"SON_OAM_SET_NW_SCAN_CONFIG_CMD",
+    (const son_s8 *)"SON_OAM_PERIODIC_NW_SCAN_REQ",
+    (const son_s8 *)"SON_OAM_NW_SCAN_REQ",
+    (const son_s8 *)"SON_OAM_BULK_NW_SCAN_RESP",
+    (const son_s8 *)"SON_OAM_PCI_CONFLICT_IND",
+    (const son_s8 *)"SON_OAM_NR_SCAN_REQ",
+    (const son_s8 *)"SON_OAM_NR_SCAN_RESP",
+    (const son_s8 *)"SON_OAM_NR_ADD_REQ",
+    (const son_s8 *)"SON_OAM_NR_ADD_RESP",
+    (const son_s8 *)"SON_OAM_NR_UPDATE_REQ",
+    (const son_s8 *)"SON_OAM_NR_UPDATE_RESP",
+    (const son_s8 *)"SON_OAM_NR_DELETE_REQ",
+    (const son_s8 *)"SON_OAM_NR_DELETE_RESP",
+    (const son_s8 *)"SON_OAM_NR_RETRIEVE_REQ",
+    (const son_s8 *)"SON_OAM_NR_RETRIEVE_RESP",
+    (const son_s8 *)"SON_OAM_ANR_UPDATED_NRT_INFO",
+    (const son_s8 *)"SON_OAM_ANR_ENABLE_REQ",
+    (const son_s8 *)"SON_OAM_ANR_ENABLE_RESP",
+    (const son_s8 *)"SON_OAM_ANR_DISABLE_REQ",
+    (const son_s8 *)"SON_OAM_ANR_DISABLE_RESP",
+    (const son_s8 *)"SON_OAM_ANR_MEAS_CONFIG_REQ",
+    (const son_s8 *)"SON_OAM_ANR_MEAS_CONFIG_RESP",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_UE_COUNT_REQ",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_UE_COUNT_RESP",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_MEAS_REPORTING_INTERVAL_REQ",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_MEAS_REPORTING_INTERVAL_RESP",
+    (const son_s8 *)"SON_OAM_NR_DELETE_FROM_REMOVE_LIST_REQ",
+    (const son_s8 *)"SON_OAM_NR_DELETE_FROM_REMOVE_LIST_RESP",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_REMOVAL_ATTRIBUTES_REQ",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_REMOVAL_ATTRIBUTES_RESP",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_PCI_CONFUSION_CFG_REQ",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_PCI_CONFUSION_CFG_RESP",
+    (const son_s8 *)"SON_OAM_ANR_ENABLE_DISABLE_LIMITED_MODE_REQ",
+    (const son_s8 *)"SON_OAM_ANR_ENABLE_DISABLE_LIMITED_MODE_RESP",
+    (const son_s8 *)"SON_OAM_NR_ENB_ADD_REQ",
+    (const son_s8 *)"SON_OAM_NR_ENB_ADD_RESP",
+    (const son_s8 *)"SON_OAM_NR_ENB_UPDATE_REQ",
+    (const son_s8 *)"SON_OAM_NR_ENB_UPDATE_RESP",
+    (const son_s8 *)"SON_OAM_NR_ENB_DELETE_REQ",
+    (const son_s8 *)"SON_OAM_NR_ENB_DELETE_RESP",
+    (const son_s8 *)"SON_OAM_NR_ENB_RETRIEVE_REQ",
+    (const son_s8 *)"SON_OAM_NR_ENB_RETRIEVE_RESP",
+    (const son_s8 *)"SON_OAM_ANR_LIMITED_MODE_PCI_INFO",
+    (const son_s8 *)"SON_OAM_ANR_NEIGHBOR_DEFAULT_CONFIG_REQ",
+    (const son_s8 *)"SON_OAM_ANR_NEIGHBOR_DEFAULT_CONFIG_RESP",
+    (const son_s8 *)"SON_OAM_ANR_GU_GROUP_ID_CONFIG_REQ",
+    (const son_s8 *)"SON_OAM_ANR_GU_GROUP_ID_CONFIG_RESP",
+    (const son_s8 *)"SON_OAM_ES_ENABLE_REQ",
+    (const son_s8 *)"SON_OAM_ES_ENABLE_RESP",
+    (const son_s8 *)"SON_OAM_ES_DISABLE_REQ",
+    (const son_s8 *)"SON_OAM_ES_DISABLE_RESP",
+    (const son_s8 *)"SON_OAM_ES_MODIFY_UE_COUNT_INTERVAL_REQ",
+    (const son_s8 *)"SON_OAM_ES_MODIFY_UE_COUNT_INTERVAL_RESP",
+    (const son_s8 *)"SON_OAM_ES_ACTIVE_UE_COUNT_REPORT",
+    (const son_s8 *)"SON_OAM_ES_CELL_SWITCH_OFF_REQ",
+    (const son_s8 *)"SON_OAM_ES_CELL_SWITCH_OFF_RESP",
+    (const son_s8 *)"SON_OAM_ES_CELL_SWITCH_ON_REQ",
+    (const son_s8 *)"SON_OAM_ES_CELL_SWITCH_ON_RESP",
+    (const son_s8 *)"SON_OAM_ES_SWITCHED_OFF_CELL_INFO_REQ",
+    (const son_s8 *)"SON_OAM_ES_SWITCHED_OFF_CELL_INFO_RESP",
+    (const son_s8 *)"SON_OAM_ES_MODIFY_UE_COUNT_THRESHOLD_REQ",
+    (const son_s8 *)"SON_OAM_ES_MODIFY_UE_COUNT_THRESHOLD_RESP",
+    (const son_s8 *)"SON_OAM_ES_UE_COUNT_THRESHOLD_HIT_IND",
+    (const son_s8 *)"SON_OAM_ES_REQUEST_TO_SWITCH_ON_CELL",
+    (const son_s8 *)"SON_OAM_ES_CELL_SWITCH_ON_OFF_IND",
+    (const son_s8 *)"SON_OAM_PCI_CONFLICT_ENABLE_DISABLE_REQ",
+    (const son_s8 *)"SON_OAM_PCI_CONFLICT_ENABLE_DISABLE_RESP",
+    (const son_s8 *)"SON_OAM_PCI_SELECTION_REQ",
+    (const son_s8 *)"SON_OAM_PCI_SELECTION_RESP",
+    (const son_s8 *)"SON_OAM_PCI_RESELECTION_REQ",
+    (const son_s8 *)"SON_OAM_PCI_RESELECTION_RESP",
+    (const son_s8 *)"SON_OAM_PCI_CONFLICT_CONFUSION_IND",
+    (const son_s8 *)"SON_OAM_CARRIER_FREQ_SELECTION_REQ",
+    (const son_s8 *)"SON_OAM_CARRIER_FREQ_SELECTION_RESP",
+    (const son_s8 *)"SON_OAM_PROC_SUP_REQ",
+    (const son_s8 *)"SON_OAM_PROC_SUP_RESP",
+    (const son_s8 *)"SON_OAM_FEATURE_STATE_CHANGE_IND",
+    (const son_s8 *)"SON_OAM_MRO_ENABLE_REQ",
+    (const son_s8 *)"SON_OAM_MRO_ENABLE_RESP",
+    (const son_s8 *)"SON_OAM_MRO_DISABLE_REQ",
+    (const son_s8 *)"SON_OAM_MRO_DISABLE_RESP",
+    (const son_s8 *)"SON_OAM_MRO_MODIFY_CONFIG_PARAM_REQ",
+    (const son_s8 *)"SON_OAM_MRO_MODIFY_CONFIG_PARAM_RESP",
+    (const son_s8 *)"SON_OAM_MRO_EUTRAN_TTT_UPDATE_IND",
+    (const son_s8 *)"SON_OAM_MRO_HO_COUNTER_REPORT",
+    (const son_s8 *)"SON_OAM_MRO_OPTIMIZATION_NOTIFICATION",
+    (const son_s8 *)"SON_OAM_MLB_ENABLE_REQ",
+    (const son_s8 *)"SON_OAM_MLB_ENABLE_RESP",
+    (const son_s8 *)"SON_OAM_MLB_DISABLE_REQ",
+    (const son_s8 *)"SON_OAM_MLB_DISABLE_RESP",
+    (const son_s8 *)"SON_OAM_MLB_MODIFY_ATTRIBUTES_REQ",
+    (const son_s8 *)"SON_OAM_MLB_MODIFY_ATTRIBUTES_RESP",
+    (const son_s8 *)"SON_OAM_EVENT_NOTIFICATION",
+    (const son_s8 *)"SON_OAM_CARRIER_FREQ_AND_DL_UL_POWER_SELECTION_REQ",
+    (const son_s8 *)"SON_OAM_CARRIER_FREQ_AND_DL_UL_POWER_SELECTION_RES",
+    (const son_s8 *)"SON_OAM_LAST_SCAN_TIMESTAMP_IND",
+    (const son_s8 *)"SON_OAM_MLB_PRARAMS_INFO",
+    (const son_s8 *)"SON_OAM_MLB_OFFSET_CHANGE_REQ",
+    (const son_s8 *)"SON_OAM_MLB_OFFSET_CHANGE_RESP",
+    (const son_s8 *)"SON_OAM_MLB_PEER_OFFSET_CHANGE_REQ",
+    (const son_s8 *)"SON_OAM_MLB_PEER_OFFSET_CHANGE_RESP",
+    (const son_s8 *)"SON_OAM_ES_AUTONOMOUS_SWITCH_OFF_CONFIG_REQ",
+    (const son_s8 *)"SON_OAM_ES_AUTONOMOUS_SWITCH_OFF_CONFIG_RESP",
+    (const son_s8 *)"SON_OAM_CHK_HEALTH_REQ",
+    (const son_s8 *)"SON_OAM_CHK_HEALTH_RESP",
+    (const son_s8 *)"SON_OAM_ANR_MEAS_CONFIG_OBJ_REMOVE_REQ",
+    (const son_s8 *)"SON_OAM_ANR_MEAS_CONFIG_OBJ_REMOVE_RESP",
+    (const son_s8 *)"SON_OAM_RACH_OPT_ENABLE_REQ",
+    (const son_s8 *)"SON_OAM_RACH_OPT_ENABLE_RESP",
+    (const son_s8 *)"SON_OAM_RACH_OPT_DISABLE_REQ",
+    (const son_s8 *)"SON_OAM_RACH_OPT_DISABLE_RESP",
+    (const son_s8 *)"SON_OAM_RACH_OPT_MODIFY_RACH_OPTMODE_REQ",
+    (const son_s8 *)"SON_OAM_RACH_OPT_MODIFY_RACH_OPTMODE_RESP",
+    (const son_s8 *)"SON_OAM_RACH_OPT_MODIFY_CONFIG_PARAMS_REQ",
+    (const son_s8 *)"SON_OAM_RACH_OPT_MODIFY_CONFIG_PARAMS_RESP",
+    (const son_s8 *)"SON_OAM_RACH_OPT_PARAMETER_UPDATE_REQ",
+    (const son_s8 *)"SON_OAM_RACH_OPT_FAILURE_NOTIFICATION",
+    (const son_s8 *)"SON_OAM_RACH_OPT_UE_INFO_REPORT",
+    (const son_s8 *)"SON_OAM_RACH_OPT_L2_PERF_REPORT",
+    /* Rel 3.0 Cell delete support changes Start */
+    (const son_s8 *)"SON_OAM_CELL_DELETE_REQ",
+    (const son_s8 *)"SON_OAM_CELL_DELETE_RESP",
+    /* Rel 3.0 Cell delete support changes Stop */
+    /* SPR-13251 Fix Starts */
+    (const son_s8 *)"SON_OAM_GET_LOG_LEVEL_REQ",
+    (const son_s8 *)"SON_OAM_GET_LOG_LEVEL_RESP",
+    /* SPR_19619 start */
+    (const son_s8 *)"SON_OAM_PEER_CELL_ACTIVATION_REQ",
+    (const son_s8 *)"SON_OAM_PEER_CELL_ACTIVATION_RESP",
+    /* SPR_19619 stop */
+    /* SPR-13251 Fix Ends */
+    (const son_s8 *)"SMIF_INIT_CONFIG_REQ",
+    (const son_s8 *)"SMIF_SHUTDOWN_REQ",
+    /* Rel 3.0 Cell delete support changes Start */
+    (const son_s8 *)"SMIF_CELL_DELETE_REQ",
+    /* Rel 3.0 Cell delete support changes Stop */
+    /* SPR-13251 Fix Starts */
+    (const son_s8 *)"SMIF_GET_LOG_LEVEL_REQ",
+    /* SPR-13251 Fix Ends */
+    (const son_s8 *)"SMIF_INIT_CONFIG_RES",
+    (const son_s8 *)"SMIF_SHUTDOWN_RES",
+    (const son_s8 *)"SMIF_GENERIC_RES",
+    (const son_s8 *)"SMIF_LOG_ENABLE_DISABLE_CMD",
+    (const son_s8 *)"SMIF_SET_LOG_LEVEL_CMD",
+    (const son_s8 *)"SMIF_CELL_INFO_IND",
+    (const son_s8 *)"SMIF_INIT_IND",
+    (const son_s8 *)"SMIF_SET_SCAN_CONFIG_CMD",
+    /* Rel 3.0 Cell delete support changes Start */
+    (const son_s8 *)"SMIF_CELL_DELETE_RESP",
+    /* Rel 3.0 Cell delete support changes Stop */
+    /* SPR-13251 Fix Starts */
+    (const son_s8 *)"SMIF_GET_LOG_LEVEL_RESP",
+     /* SPR_19619 start */
+    (const son_s8 *)"SMIF_PEER_CELL_ACTIVATION_RESP",
+     /* SPR_19619 stop */
+    /* SPR-13251 Fix Ends */
+    (const son_s8 *)"SONX2_ADD_ENB_REQ",
+    (const son_s8 *)"SONX2_DELETE_ENB_REQ",
+    (const son_s8 *)"SONX2_NRT_UPDATE_IND",
+    (const son_s8 *)"SONX2_ENB_RESET_REQ",
+    (const son_s8 *)"SONX2_SWITCH_ON_OFF_IND",
+    (const son_s8 *)"SONX2_MOBILITY_CHANGE_REQ",
+    (const son_s8 *)"SONX2_MOBILITY_CHANGE_ACK",
+    (const son_s8 *)"SONX2_MOBILITY_CHANGE_FAILURE",
+    /* SPR-10331 Fix Starts */
+    (const son_s8 *)"SONX2_GU_GROUP_ID_CONFIG_REQ",
+     /* SPR_19619 start */
+    (const son_s8 *)"SONX2_PEER_CELL_ACTIVATION_REQ",
+     /* SPR_19619 stop */
+    /* SPR-10331 Fix Ends */
+    (const son_s8 *)"SONX2_ADD_ENB_RES",
+    (const son_s8 *)"SONX2_LINK_UP_IND",
+    (const son_s8 *)"SONX2_LINK_DOWN_IND",
+    (const son_s8 *)"SONX2_DELETE_ENB_RES",
+    (const son_s8 *)"SONX2_ENB_CONFIG_UPDATE_IND",
+    (const son_s8 *)"SONX2_ENB_RESET_RES",
+    (const son_s8 *)"SONX2_HO_REPORT_IND",
+    (const son_s8 *)"SONX2AP_HO_REPORT_IND",
+    /* SPR-10331 Fix Starts */
+    (const son_s8 *)"SONX2_GU_GROUP_ID_CONFIG_RES",
+    /* SPR-10331 Fix Ends */
+    (const son_s8 *)"SONES_CELL_SWITCH_ON_FOR_X2_SETUP_REQ",
+    (const son_s8 *)"SONES_CELL_ACTIVATION_REQ",
+    (const son_s8 *)"SONES_CELL_SWITCH_ON_FOR_X2_SETUP_RES",
+    (const son_s8 *)"SONES_CELL_ACTIVATION_RESP",
+     /* SPR_19619 start */
+    (const son_s8 *)"SONX2_PEER_CELL_ACTIVATION_RESP",
+     /* SPR_19619 stop */
+    /* Rel 3.0 Multi Sector code changes Start */
+    (const son_s8 *)"SONANR_CELL_SWITCH_ON_OFF_IND",
+    /* Rel 3.0 Multi Sector code changes Stop */
+    /* SPR 20653 Fix Start */
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_ATTRIBUTE_REQ",
+    (const son_s8 *)"SON_OAM_ANR_MODIFY_ATTRIBUTE_RESP",
+    /* SPR 20653 Fix End */
+    (const son_s8 *)"NOT_AVAILABLE"
+};
+/* Bug 121 Fix Ends */
+
+/*  RA_CONFIG_FDD_DATA_FOR_PREAMBLE - Array storing possible values of 
+    Preamble format and density value for all possible PRACH configuraion index     for frame type 1. PRACH configuraion index range from 0 to 63 so each entry
+    in this array corresponds to data for particular PRACH configuration index
+    starting at index 0.
+ */
+const frame_type_1_ra_config_data_for_preamble RA_CONFIG_FDD_DATA_FOR_PREAMBLE[
+SON_MAX_PRACH_CONFIG_IDX] =
+{
+    {PREAMBLE_FORMAT_0, 0.5}, /* PRACH configuration Index 0 */
+    {PREAMBLE_FORMAT_0, 0.5}, /* PRACH configuration Index 1 */
+    {PREAMBLE_FORMAT_0, 0.5}, /* PRACH configuration Index 2 */
+    {PREAMBLE_FORMAT_0, 1.0}, /* PRACH configuration Index 3 */
+    {PREAMBLE_FORMAT_0, 1.0}, /* PRACH configuration Index 4 */
+    {PREAMBLE_FORMAT_0, 1.0}, /* PRACH configuration Index 5 */
+    {PREAMBLE_FORMAT_0, 2.0}, /* PRACH configuration Index 6 */
+    {PREAMBLE_FORMAT_0, 2.0}, /* PRACH configuration Index 7 */
+    {PREAMBLE_FORMAT_0, 2.0}, /* PRACH configuration Index 8 */
+    {PREAMBLE_FORMAT_0, 3.0}, /* PRACH configuration Index 9 */
+    {PREAMBLE_FORMAT_0, 3.0}, /* PRACH configuration Index 10 */
+    {PREAMBLE_FORMAT_0, 3.0}, /* PRACH configuration Index 11 */
+    {PREAMBLE_FORMAT_0, 5.0}, /* PRACH configuration Index 12 */
+    {PREAMBLE_FORMAT_0, 5.0}, /* PRACH configuration Index 13 */
+    {PREAMBLE_FORMAT_0, 10.0}, /* PRACH configuration Index 14 */
+    {PREAMBLE_FORMAT_0, 0.5}, /* PRACH configuration Index 15 */
+    {PREAMBLE_FORMAT_1, 0.5}, /* PRACH configuration Index 16 */
+    {PREAMBLE_FORMAT_1, 0.5}, /* PRACH configuration Index 17 */
+    {PREAMBLE_FORMAT_1, 0.5}, /* PRACH configuration Index 18 */
+    {PREAMBLE_FORMAT_1, 1.0}, /* PRACH configuration Index 19 */
+    {PREAMBLE_FORMAT_1, 1.0}, /* PRACH configuration Index 20 */
+    {PREAMBLE_FORMAT_1, 1.0}, /* PRACH configuration Index 21 */
+    {PREAMBLE_FORMAT_1, 2.0}, /* PRACH configuration Index 22 */
+    {PREAMBLE_FORMAT_1, 2.0}, /* PRACH configuration Index 23 */
+    {PREAMBLE_FORMAT_1, 2.0}, /* PRACH configuration Index 24 */
+    {PREAMBLE_FORMAT_1, 3.0}, /* PRACH configuration Index 25 */
+    {PREAMBLE_FORMAT_1, 3.0}, /* PRACH configuration Index 26 */
+    {PREAMBLE_FORMAT_1, 3.0}, /* PRACH configuration Index 27 */
+    {PREAMBLE_FORMAT_1, 5.0}, /* PRACH configuration Index 28 */
+    {PREAMBLE_FORMAT_1, 5.0}, /* PRACH configuration Index 29 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 30 */
+    {PREAMBLE_FORMAT_1, 0.5}, /* PRACH configuration Index 31 */
+    {PREAMBLE_FORMAT_2, 0.5}, /* PRACH configuration Index 32 */
+    {PREAMBLE_FORMAT_2, 0.5}, /* PRACH configuration Index 33 */
+    {PREAMBLE_FORMAT_2, 0.5}, /* PRACH configuration Index 34 */
+    {PREAMBLE_FORMAT_2, 1.0}, /* PRACH configuration Index 35 */
+    {PREAMBLE_FORMAT_2, 1.0}, /* PRACH configuration Index 36 */
+    {PREAMBLE_FORMAT_2, 1.0}, /* PRACH configuration Index 37 */
+    {PREAMBLE_FORMAT_2, 2.0}, /* PRACH configuration Index 38 */
+    {PREAMBLE_FORMAT_2, 2.0}, /* PRACH configuration Index 39 */
+    {PREAMBLE_FORMAT_2, 2.0}, /* PRACH configuration Index 40 */
+    {PREAMBLE_FORMAT_2, 3.0}, /* PRACH configuration Index 41 */
+    {PREAMBLE_FORMAT_2, 3.0}, /* PRACH configuration Index 42 */
+    {PREAMBLE_FORMAT_2, 3.0}, /* PRACH configuration Index 43 */
+    {PREAMBLE_FORMAT_2, 5.0}, /* PRACH configuration Index 44 */
+    {PREAMBLE_FORMAT_2, 5.0}, /* PRACH configuration Index 45 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 46 */
+    {PREAMBLE_FORMAT_2, 0.5}, /* PRACH configuration Index 47 */
+    {PREAMBLE_FORMAT_3, 0.5}, /* PRACH configuration Index 48 */
+    {PREAMBLE_FORMAT_3, 0.5}, /* PRACH configuration Index 49 */
+    {PREAMBLE_FORMAT_3, 0.5}, /* PRACH configuration Index 50 */
+    {PREAMBLE_FORMAT_3, 1.0}, /* PRACH configuration Index 51 */
+    {PREAMBLE_FORMAT_3, 1.0}, /* PRACH configuration Index 52 */
+    {PREAMBLE_FORMAT_3, 1.0}, /* PRACH configuration Index 53 */
+    {PREAMBLE_FORMAT_3, 2.0}, /* PRACH configuration Index 54 */
+    {PREAMBLE_FORMAT_3, 2.0}, /* PRACH configuration Index 55 */
+    {PREAMBLE_FORMAT_3, 2.0}, /* PRACH configuration Index 56 */
+    {PREAMBLE_FORMAT_3, 3.0}, /* PRACH configuration Index 57 */
+    {PREAMBLE_FORMAT_3, 3.0}, /* PRACH configuration Index 58 */
+    {PREAMBLE_FORMAT_3, 3.0}, /* PRACH configuration Index 59 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 60 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 61 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 62 */
+    {PREAMBLE_FORMAT_3, 0.5}, /* PRACH configuration Index 63 */
+};
+
+/*  RA_CONFIG_TDD_DATA_FOR_PREAMBLE - Array storing possible values of 
+    Preamble format and density value for all possible PRACH configuraion index     for frame type 2. PRACH configuraion index range from 0 to 63 so each entry
+    in this array corresponds to data for particular PRACH configuration index
+    starting at index 0.
+ */
+const frame_type_2_ra_config_data_for_preamble RA_CONFIG_TDD_DATA_FOR_PREAMBLE[
+SON_MAX_PRACH_CONFIG_IDX] = 
+{
+    {PREAMBLE_FORMAT_0, 0.5}, /* PRACH configuration Index 0 */
+    {PREAMBLE_FORMAT_0, 0.5}, /* PRACH configuration Index 1 */
+    {PREAMBLE_FORMAT_0, 0.5}, /* PRACH configuration Index 2 */
+    {PREAMBLE_FORMAT_0, 1.0}, /* PRACH configuration Index 3 */
+    {PREAMBLE_FORMAT_0, 1.0}, /* PRACH configuration Index 4 */
+    {PREAMBLE_FORMAT_0, 1.0}, /* PRACH configuration Index 5 */
+    {PREAMBLE_FORMAT_0, 2.0}, /* PRACH configuration Index 6 */
+    {PREAMBLE_FORMAT_0, 2.0}, /* PRACH configuration Index 7 */
+    {PREAMBLE_FORMAT_0, 2.0}, /* PRACH configuration Index 8 */
+    {PREAMBLE_FORMAT_0, 3.0}, /* PRACH configuration Index 9 */
+    {PREAMBLE_FORMAT_0, 3.0}, /* PRACH configuration Index 10 */
+    {PREAMBLE_FORMAT_0, 3.0}, /* PRACH configuration Index 11 */
+    {PREAMBLE_FORMAT_0, 4.0}, /* PRACH configuration Index 12 */
+    {PREAMBLE_FORMAT_0, 4.0}, /* PRACH configuration Index 13 */
+    {PREAMBLE_FORMAT_0, 4.0}, /* PRACH configuration Index 14 */
+    {PREAMBLE_FORMAT_0, 5.0}, /* PRACH configuration Index 15 */
+    {PREAMBLE_FORMAT_0, 5.0}, /* PRACH configuration Index 16 */
+    {PREAMBLE_FORMAT_0, 5.0}, /* PRACH configuration Index 17 */
+    {PREAMBLE_FORMAT_0, 6.0}, /* PRACH configuration Index 18 */
+    {PREAMBLE_FORMAT_0, 6.0}, /* PRACH configuration Index 19 */
+    {PREAMBLE_FORMAT_1, 0.5}, /* PRACH configuration Index 20 */
+    {PREAMBLE_FORMAT_1, 0.5}, /* PRACH configuration Index 21 */
+    {PREAMBLE_FORMAT_1, 0.5}, /* PRACH configuration Index 22 */
+    {PREAMBLE_FORMAT_1, 1.0}, /* PRACH configuration Index 23 */
+    {PREAMBLE_FORMAT_1, 1.0}, /* PRACH configuration Index 24 */
+    {PREAMBLE_FORMAT_1, 2.0}, /* PRACH configuration Index 25 */
+    {PREAMBLE_FORMAT_1, 3.0}, /* PRACH configuration Index 26 */
+    {PREAMBLE_FORMAT_1, 4.0}, /* PRACH configuration Index 27 */
+    {PREAMBLE_FORMAT_1, 5.0}, /* PRACH configuration Index 28 */
+    {PREAMBLE_FORMAT_1, 6.0}, /* PRACH configuration Index 29 */
+    {PREAMBLE_FORMAT_2, 0.5}, /* PRACH configuration Index 30 */
+    {PREAMBLE_FORMAT_2, 0.5}, /* PRACH configuration Index 31 */
+    {PREAMBLE_FORMAT_2, 0.5}, /* PRACH configuration Index 32 */
+    {PREAMBLE_FORMAT_2, 1.0}, /* PRACH configuration Index 33 */
+    {PREAMBLE_FORMAT_2, 1.0}, /* PRACH configuration Index 34 */
+    {PREAMBLE_FORMAT_2, 2.0}, /* PRACH configuration Index 35 */
+    {PREAMBLE_FORMAT_2, 3.0}, /* PRACH configuration Index 36 */
+    {PREAMBLE_FORMAT_2, 4.0}, /* PRACH configuration Index 37 */
+    {PREAMBLE_FORMAT_2, 5.0}, /* PRACH configuration Index 38 */
+    {PREAMBLE_FORMAT_2, 6.0}, /* PRACH configuration Index 39 */
+    {PREAMBLE_FORMAT_3, 0.5}, /* PRACH configuration Index 40 */
+    {PREAMBLE_FORMAT_3, 0.5}, /* PRACH configuration Index 41 */
+    {PREAMBLE_FORMAT_3, 0.5}, /* PRACH configuration Index 42 */
+    {PREAMBLE_FORMAT_3, 1.0}, /* PRACH configuration Index 43 */
+    {PREAMBLE_FORMAT_3, 1.0}, /* PRACH configuration Index 44 */
+    {PREAMBLE_FORMAT_3, 2.0}, /* PRACH configuration Index 45 */
+    {PREAMBLE_FORMAT_3, 3.0}, /* PRACH configuration Index 46 */
+    {PREAMBLE_FORMAT_3, 4.0}, /* PRACH configuration Index 47 */
+    {PREAMBLE_FORMAT_4, 0.5}, /* PRACH configuration Index 48 */
+    {PREAMBLE_FORMAT_4, 0.5}, /* PRACH configuration Index 49 */
+    {PREAMBLE_FORMAT_4, 0.5}, /* PRACH configuration Index 50 */
+    {PREAMBLE_FORMAT_4, 1.0}, /* PRACH configuration Index 51 */
+    {PREAMBLE_FORMAT_4, 1.0}, /* PRACH configuration Index 52 */
+    {PREAMBLE_FORMAT_4, 2.0}, /* PRACH configuration Index 53 */
+    {PREAMBLE_FORMAT_4, 3.0}, /* PRACH configuration Index 54 */
+    {PREAMBLE_FORMAT_4, 4.0}, /* PRACH configuration Index 55 */
+    {PREAMBLE_FORMAT_4, 5.0}, /* PRACH configuration Index 56 */
+    {PREAMBLE_FORMAT_4, 6.0}, /* PRACH configuration Index 57 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 58 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 59 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 60 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 61 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 62 */
+    {PREAMBLE_FORMAT_NA, 0.0}, /* PRACH configuration Index 63 */
+};
+
+const son_8 *DUPLEX_MODE_OF_CELL[SON_MAX_NUM_OF_DUPLEX_MODES] =
+                    {"SON_FDD_MODE","SON_TDD_MODE" };
+
+/* SPR-11639 Fix Starts */
+/* Possible CIO Enum value names */
+const son_s8 *CIO_NAMES[] =
+{
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_24",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_22",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_20",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_18",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_16",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_14",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_12",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_10",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_8",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_6",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_5",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_4",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_3",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_2",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB_1",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB0",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB1",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB2",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB3",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB4",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB5",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB6",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB8",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB10",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB12",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB14",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB16",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB18",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB20",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB22",
+    (const son_s8 *)"SON_Q_OFFSET_RANGE_DB24",
+    (const son_s8 *)"NOT_AVAILABLE"
+};
+/* SPR-11639 Fix Ends */
+
+/* Used in logger for identifying SON UTILS */
+const son_8 *son_utils_facility_name = "SON UTILS";
+
+/* Variable storing the status of threads in SON*/
+static struct timeval son_thread_state[SON_MAX_NUMBER_OF_THREADS];
+
+extern pthread_key_t cell_and_ue_index_key;
+

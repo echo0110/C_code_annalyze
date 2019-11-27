@@ -1,0 +1,34 @@
+/******************************************************************************
+ *
+ *   FILE NAME:
+ *       shell.c
+ *
+ *   DESCRIPTION:
+ *       Here is implementation of CSPL driver. It is responsible for
+ *       communication with external entities through sockets.
+ *       It manage with messages headers and
+ *       determine internal destination RRC module.
+ *
+ *   DATE            AUTHOR      REFERENCE       REASON
+ *   23 July 2009    VasylS      ---------       Initial
+ *
+ *   Copyright (c) 2009, Aricent Inc. All Rights Reserved
+ *
+ ******************************************************************************/
+
+#define _GNU_SOURCE
+
+
+#include <lteMisc.h>
+#include <cspl.h>
+#include <shell.h>
+#include <pthread.h>
+#include "rrc_defines.h"
+#include "rrc_handlers.h"
+#include "rrc_ext_api.h"
+#include "rrc_msg_mgmt.h"
+#include "rrc_common_utils.h"
+#include "sctp_wrappers.h"
+#include "s1ap_api.h"
+#include "x2ap_api.h"  /* L3-X2AP Integration Activity */
+#include "rrc_logging.h"

@@ -1,0 +1,88 @@
+# File Description
+#*********************************************************************************************
+# This file contains the informatio about periodic CQI reports requeseted by the ENodeB.
+#*********************************************************************************************
+# crnti (UE Identifier)
+# periodicity - this parameter means CQI report will be sent after this much
+# amount of time (in seconds).  
+# numCqiInstances - this parameters means how many cqi reports user wants to send
+#                  periodically. 
+# based upon this parameter simulator will send all the report type present on
+# files for that particular crnti one by one.
+#
+# reportType - cqi report type can be any of the following -
+#
+# PERIODIC_CQI_MODE_1_0_TYPE_3 = 34
+# parameters required for this report types are:
+# riVal - it can either 1 or 2 
+#
+# PERIODIC_CQI_MODE_1_0_TYPE_4 = 35
+# wBandCqiIndex - Any Value between 0 -15
+
+# PERIODIC_CQI_MODE_1_1_TYPE_2 = 36
+# widebandCQIValueCodeword0 - Any Value among 0 -15
+# widebandCQIValueCodeword1 - Valid when RI >1
+# widebandPMI - 1,2  or 4
+#
+# PERIODIC_CQI_MODE_1_1_TYPE_3 = 37
+# riVal - it can either 1 or 2 
+#
+# PERIODIC_CQI_MODE_2_0_TYPE_1 = 38
+# bandwidthPart - 1,2,3,4 depending on the Bandwidth
+# Lbitlabel - 1,2,3,4 Position of the M selected subbands.
+# cqiValue - Any value among 0 -15
+#
+# PERIODIC_CQI_MODE_2_0_TYPE_3 = 39
+# riVal - it can either 1 or 2 
+#
+# PERIODIC_CQI_MODE_2_0_TYPE_4 = 40
+# wBandCqiIndex - Any Value among 0 -15 
+#
+# PERIODIC_CQI_MODE_2_1_TYPE_1 = 41
+# bandwidthPart - 1,2,3,4 depending on the Bandwidth
+# Lbitlabel - 1,2,3,4 Position of the M selected subbands.
+# cqiValueCodeWord0 - Any Value among 0 -15
+# cqiValueCodeWord1 - Any Value among 0 -15
+#
+# PERIODIC_CQI_MODE_2_1_TYPE_2 = 42
+# widebandCQIValueCodeword0 - Any Value among 0 -15
+# widebandCQIValueCodeword1 - Valid when RI >1
+# widebandPMI - 1,2  or 4
+#
+# PERIODIC_CQI_MODE_2_1_TYPE_3 = 43
+# riVal - it can either 1 or 2 
+#
+#********************************************************************************************
+[UE]
+crnti=61
+periodicity=2
+numCqiInstances=10
+reportType=34
+riVal=1
+reportType=35
+wBandCqiIndex=12
+reportType=36
+widebandCQIValueCodeword0=4
+widebandCQIValueCodeword1=4
+widebandPMI=2
+reportType=37
+riVal=1
+reportType=38
+bandwidthPart=1
+Lbitlabel=1
+cqiValue=3
+reportType=39
+riVal=1
+reportType=40
+wBandCqiIndex=12
+reportType=41
+bandwidthPart=1
+Lbitlabel=1
+cqiValueCodeWord0=4
+cqiValueCodeWord1=1
+reportType=42
+widebandCQIValueCodeword0=4
+widebandCQIValueCodeword1=4
+widebandPMI=2
+reportType=43
+riVal=1

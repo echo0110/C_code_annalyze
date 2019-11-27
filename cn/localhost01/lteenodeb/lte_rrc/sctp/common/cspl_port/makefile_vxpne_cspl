@@ -1,0 +1,132 @@
+#########################################################################
+#			CSPL Compilation from Common. 	        	#
+			#Amit Ray      28.09.2005      Create Original  #
+#########################################################################
+
+ifeq ($(WIND_HOST_TYPE),sun4-solaris2)
+CP=cp
+MV=mv
+RM=\rm -fr
+MK_SLASH=/
+endif
+
+ifeq ($(WIND_HOST_TYPE),x86-win32)
+CPY				=	cp
+MV				= 	mv
+RM				=	rm -rf
+MK_SLASH			=	\\
+endif
+
+MAKE				=	make
+CP				    =	copy
+TOOL   				=	gnu
+COF  	  			=	objcopy -lpz
+OBJ_SUFFIX			=	o
+
+ifeq ($(VXWORKS_RELEASE),5.5.1)
+
+CC              =       ccpentium
+CPU             =       PENTIUM
+LIB             =       arpentium cru
+RANLIB          =       ranlibpentium
+LD              =       ldpentium   -N -r
+CPU_CFLAGS      =        -c -ansi  -fvolatile -nostdlib -fno-builtin -fno-defer-pop -Wall -DVX_PNE
+
+else
+
+CC              =       cc386
+CPU             =       PENTIUM
+LIB             =       ar386 cru
+RANLIB          =       ranlib386
+LD              =       ld386   -N -r
+CPU_CFLAGS      =       -DVX_IGNORE_GNU_LIBS -DVX_PNE\
+                        -mpentium  -nostdinc\
+                        -fvolatile -nostdlib -D_REENTRANT\
+                        -fno-builtin -fno-defer-pop
+endif
+
+ROOTDIR=$(VOB_CSPL_DIR)$(MK_SLASH)build$(MK_SLASH)
+include $(ROOTDIR)$(MK_SLASH)cspl.mk
+
+target = cspl.lib.o 
+library = libcspl.a libmpset.a libcpset.a
+
+objects = \
+	es.o              \
+	run.o              \
+	manifest.o        \
+	cspl.o            \
+	cpool.o           \
+	stacklayer.o      \
+	ylib-bitmap.o     \
+	ylib-bufop.o      \
+	ylib-hash.o       \
+	ylib-pool.o       \
+	ylib-tree.o       \
+	ylib-bitstring.o  \
+	ylib-crc.o        \
+	ylib-list.o       \
+	ylib-squeue.o
+####################################################################
+#    Change these values depending on the BSP You are using.       #
+####################################################################
+
+CSPL_COMPILE=ccpentium
+CSPL_LINKOBJ=ldpentium -N -r
+CSPL_LINKEXE=$(CSPL_COMPILE)
+CSPL_AR=ldpentium -N -r -o
+CSPL_RANLIB=ldpentium -N -r
+
+CSPL_FLAGS='-D_ANSI_C_ -ansi -fvolatile -nostdlib -fno-builtin -fno-defer-pop -Wall -DCPU=PENTIUM -D__ANSI_C__' 
+
+####################################################################
+#        Additional include directory for PNE                      #
+####################################################################
+
+CSPL_INCLUDES += -I$(WIND_BASE)$(MK_SLASH)target$(MK_SLASH)h -I$(WIND_BASE)$(MK_SLASH)target$(MK_SLASH)h$(MK_SLASH)net -I..$(MK_SLASH)h  -I..$(MK_SLASH)ports$(MK_SLASH)vxworks -I..$(MK_SLASH)drivers$(MK_SLASH)vxworks -I$(WIND_BASE)$(MK_SLASH)target$(MK_SLASH)h$(MK_SLASH)wrn$(MK_SLASH)coreip -I$(WIND_BASE)$(MK_SLASH)target$(MK_SLASH)h$(MK_SLASH)sys 
+
+mpset_objects = mpoolset.o
+cpset_oblects = cpoolset.o
+
+default: $(target) $(library)
+	$(MV) *.a $(VOB_CSPL_DIR)$(MK_SLASH)build
+	$(MV) *.o $(VOB_CSPL_DIR)$(MK_SLASH)build
+
+$(target): $(objects) $(mpset_objects) $(cpset_oblects)
+	$(CSPL_LINKOBJ) -o $@ $(objects)  $(mpset_objects) $(cpset_oblects)
+
+$(library): $(objects) $(mpset_objects) $(cpset_oblects)
+	$(CSPL_AR) libcspl.a $(objects) 
+	$(CSPL_AR) libmpset.a $(mpset_objects) 
+	$(CSPL_AR) libcpset.a $(cpset_oblects) 
+	$(CSPL_RANLIB) libcspl.a
+	$(CSPL_RANLIB) libmpset.a
+	$(CSPL_RANLIB) libcpset.a
+
+$(objects):%.o: $(ROOTDIR)../src/%.c
+	$(CSPL_COMPILE) $(CSPL_FLAGS) -c $(CSPL_INCLUDES) -c $< -o $@
+
+$(mpset_objects):%.o: $(ROOTDIR)../src/%.c
+	$(CSPL_COMPILE) $(CSPL_FLAGS) -c $(CSPL_INCLUDES) -c $< -o $@
+
+$(cpset_oblects):%.o: $(ROOTDIR)../src/%.c
+	$(CSPL_COMPILE) $(CSPL_FLAGS) -c $(CSPL_INCLUDES) -c $< -o $@
+
+
+clean:
+	$(RM) $(objects) $(target) $(library) $(mpset_objects) $(cpset_oblects)
+	$(RM) *.a *.o
+
+configshow:
+	@echo 
+	@echo "Configuration"
+	@echo "    CSPL_COMPILE (Compiler) is:        $(CSPL_COMPILE)"
+	@echo "    CSPL_FLAGS (Flags) are:            $(CSPL_FLAGS)"
+	@echo "    CSPL_LINKOBJ (Partial Linker) is:  $(CSPL_LINKOBJ)"
+	@echo "    CSPL_LINKEXE (Final Linker) is:    $(CSPL_LINKEXE)"
+	@echo "    CSPL_LIBRARIES (Libraries) are:    $(CSPL_LIBRARIES)"
+	@echo "    CSPL_AR (Archiver) is:             $(CSPL_AR)"
+	@echo "    CSPL_RANLIB (Ranlib) is:           $(CSPL_RANLIB)"
+	@echo "Usage:"
+	@echo "    $(MAKE) [PORT=<port>] [DRIVER=<driver>] [CONFIG=<file>] <target>"
+	@echo

@@ -1,0 +1,13 @@
+# To generate cfg file as required by logger , please use the following awk utility in the series as mentioned:-
+1> Create an input file to be read by awk utility with the following information
+# Specify Module Name in Caps(Upper case letters Only)
+# Specify the stack's module id.
+# Put the name of the API definitions header file for the stack
+# Note:- In the api_defs.h file for any stack , pls. make sure that it contains only the API definitions. If this file contains other definitions then just delete them . Also in case there are multiple definition files for each interface of the stack then make a consolidated file containing all the definitions together.
+As an example
+#<MODULE_NAME>                  <MODULE_ID>                     <API_DEFS.H>
+NBAP				8				nbuapidef.h
+2> Run create_cfg by the following command which creates logger.cfg as the config file required by the logger
+	./create_cfg	input	logger.cfg
+Please Note that to generate logger.cfg, input and all the api_defs.h files are placed in the same directory where create_cfg is located.
+An example implementation with sample stack definition files and the input file required by create_cfg utility is present in the cspl/utils/logger/samples.

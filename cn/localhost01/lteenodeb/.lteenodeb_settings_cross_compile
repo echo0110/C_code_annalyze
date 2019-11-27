@@ -1,0 +1,36 @@
+export HOST_COMPILATION=0
+#BSP=BRCM_CA_BSP
+BSP=BRCM_NON_CA_BSP
+if [ "$BSP" == "BRCM_CA_BSP" ]; then
+export LTE_ROOT=`pwd`
+export LTE_ROOT=`pwd`
+export LINUX_SOURCE=/rfs/rfs/bc/bsp/CELIVERO_BSP_2_23/linux-3.0.1-source/usr/include/brcm
+export LTE_CC='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc-4.7.3'
+export LTE_MAKE_BIN='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc-4.7.3'
+export LTE_AR='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-ar'
+export LTE_LD='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-ld -r'
+export LTE_RANLIB='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-ranlib'
+export L1_SOURCE=/rfs/rfs/bc/l1/1.1700.2/L1_SRC_Files/LTE_L1_LTE_l1_1.1700.2
+export BRCM_BSP_2_17=1
+export BRCM_BSP_2_18=0
+echo "======================================================="
+echo $BSP will be used!!!
+echo "======================================================="
+elif [ "$BSP" == "BRCM_NON_CA_BSP" ]; then
+export LINUX_SOURCE=/rfs/rfs/bc/bsp/CELIVERO_BSP_2_20_NT_NL/linux-3.4rt/usr/include/brcm/
+export LTE_CC='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc-4.7.3'
+export LTE_MAKE_BIN='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc-4.7.3'
+export LTE_AR='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-ar'
+export LTE_LD='/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-ld -r'
+export LTE_RANLIB=/rfs/rfs/bc/TOOLCHAIN_4_7_3/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-ranlib
+export L1_SOURCE=/rfs/rfs/bc/l1/1.14.253_NT_NL_BSP2.20/L1_SRC_Files/LTE_L1_1.14.25.3
+export BRCM_BSP_2_17=0
+export BRCM_BSP_2_18=1
+echo "======================================================="
+echo $BSP will be used!!!
+echo "======================================================="
+else
+    echo "BSP is neither CA nor NON_CA"
+fi
+
+

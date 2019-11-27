@@ -1,0 +1,24 @@
+/******************************************************************************
+*
+*   FILE NAME:
+*       rrc_logging.c
+*
+*   DESCRIPTION:
+*       This is the main file of the logging thread.
+*
+*   DATE            AUTHOR      REFERENCE       REASON
+*   27 Jun 2013     Simar       ---------       Initial
+*
+*   Copyright (c) 2009, Aricent Inc. All Rights Reserved
+*
+******************************************************************************/
+/*Logging Changes Start*/
+#define _GNU_SOURCE
+#include <cspl.h>
+#include <stacklayer.h>
+#include "rrc_defines.h"
+#include "rrc_handlers.h"
+#include "rrc_common_utils.h"
+#include "rrc_msg_mgmt.h"
+#include "rrc_logging.h"
+#include "rrc_oam_intf.h"

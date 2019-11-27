@@ -1,0 +1,4 @@
+NBAP 	8 	nbuapidef.h
+RANAP	9	rn_defs.h 
+RRC	4	rrc_api_defs.h 
+RLC	3	rlc_apitypes.h 

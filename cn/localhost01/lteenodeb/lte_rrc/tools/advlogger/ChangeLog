@@ -1,0 +1,21 @@
+2009.02.06		Kovalchuk Sergiy	<Sergiy.Kovalchuk@aricent.com>
+* v1.0:			Initial creation, File, Console and Syslog targets are done
+
+2009.03.12		Kovalchuk Sergiy	<Sergiy.Kovalchuk@aricent.com>
+* v1.1 			Network logger in rude implementation was added
+
+2009.03.13		Kovalchuk Sergiy	<Sergiy.Kovalchuk@aricent.com>
+* v1.2 			File rollover was added
+
+2009.03.16		Kovalchuk Sergiy	<Sergiy.Kovalchuk@aricent.com>
+* v1.3 			Network logger daemon completed, minor bugs fixed
+
+2009.03.16		Kovalchuk Sergiy	<Sergiy.Kovalchuk@aricent.com>
+v2.0: 			Major refactoring of source code was done. List of changes:
+					- multiple targets are supported
+					- adjustable rollover size has been added
+					- multi_log example was added
+					- multithreading configure option has been removed - now multithreading support is enabled by default
+
+2009.03.30		Kovalchuk Sergiy	<Sergiy.Kovalchuk@aricent.com>
+v2.1:			Minor fixes. Minro features have been added
