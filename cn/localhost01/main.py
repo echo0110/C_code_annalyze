@@ -133,22 +133,28 @@ def argument_parser(argv):
          sys.exit()
       elif opt in ("-i", "--ifile"):
          inputfile = arg
+         sys.argv[1] = getpwd()
          findfile(sys.argv[1], inputfile)
       elif opt in ("-o", "--ofile"):
          outputfile = arg
+
    print('输入的文件为：', inputfile)
    print('输出的文件为：', outputfile)
-# def findfile(start, name):
-#     # for relpath, dirs, files in os.walk(start):
-#     for root, dirs, files in os.walk(start, topdown=False):
-#         if name in files:
-#             full_path = os.path.join(start, root, name)
-#             print(os.path.normpath(os.path.abspath(full_path)))
+def findfile(path, name):
+    # for relpath, dirs, files in os.walk(start):
+    for root, dirs, files in os.walk(path, topdown=False):
+        if name in files:
+            full_path = os.path.join(path, root, name)
+            print(os.path.normpath(os.path.abspath(full_path)))
 
+def getpwd():
+    pwd = sys.path[0]
+    if os.path.isfile(pwd):
+        pwd = os.path.dirname(pwd)
+    print(pwd)
+    return pwd
 if __name__ == '__main__':
+    # getpwd()
     argument_parser(sys.argv[1:])
     # argument_parser(sys.argv[1:])
     # analyzecode()
-
-
-
