@@ -68,6 +68,18 @@ def analyzecode(file_path):
                         key += 1
                 pattern = re.compile(r'["](?:.|\n)*?["]')
                 log_str = pattern.findall(text_lines2[text2_log_line])
+                text_lines2_list = list(text_lines2[text2_log_line])
+                nPos = text_lines2_list.index('/')
+                text_lines2_list.insert(nPos+4, '9')
+                str_2 = "".join(text_lines2_list)
+                print(str_2)
+
+
+                # nPos = log_str[0].rfind('"', 0, len(log_str[0]))
+                # print("nPos=%d\n", nPos)
+                # A = list(text_lines2[text2_log_line])
+                # log_str0_len = len(A)
+                # text_lines2[text2_log_line].insert(log_str0_len+1, '/')
                 print("log_str[0]=%s\n", log_str[0])
                 print("log_str[1]=%s\n", log_str[1])
                 sql_id = mysqlconnect(log_str[0], log_str[1])
