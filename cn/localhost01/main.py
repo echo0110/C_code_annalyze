@@ -69,10 +69,13 @@ def analyzecode(file_path):
                 pattern = re.compile(r'["](?:.|\n)*?["]')
                 log_str = pattern.findall(text_lines2[text2_log_line])
                 text_lines2_list = list(text_lines2[text2_log_line])
-                nPos = text_lines2_list.index('/')
-                text_lines2_list.insert(nPos+4, '9')
+                nPos = text_lines2_list.index('\\')
+                text_lines2_list[nPos+4] = '9'
+                # text_lines2_list.append(nPos+4, '9')
                 str_2 = "".join(text_lines2_list)
                 print(str_2)
+
+                # result = re.findall(".*entry(.*)for.*",string)
 
 
                 # nPos = log_str[0].rfind('"', 0, len(log_str[0]))
