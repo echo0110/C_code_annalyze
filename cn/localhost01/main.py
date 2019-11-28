@@ -55,22 +55,22 @@ def analyzecode(file_path):
         # print(type(text_lines), text_lines)
         # for line in text_lines:
         for i, line in enumerate(text_lines):            # log_line = log_line+1
-            if u'LOG_MSG' in line:
+            if u'LOG_ID_MSG' in line:
                 log_line = i
                 print(log_line)
                 text2_log_line = log_line
-                strinfo = re.compile('LOG_MSG')
-                text_lines[log_line] = strinfo.sub('print_msg', text_lines[log_line])
-                # text_lines[log_line].replace('LOG_MSG', 'print_msg')
-                print(text_lines[log_line])
+                # strinfo = re.compile('LOG_MSG')
+                # text_lines[log_line] = strinfo.sub('print_msg', text_lines[log_line])
+                # print(text_lines[log_line])
                 while text_lines[log_line].find(";", 0, len(text_lines[log_line]) - 1) == -1:
                         text_lines2[text2_log_line] += text_lines[log_line+1]
                         log_line += 1
                         key += 1
                 pattern = re.compile(r'["](?:.|\n)*?["]')
-                log_str = pattern.findall(text_lines[log_line])
-                # print("x=%s\n", log_str)
-                sql_id = mysqlconnect(log_str)
+                log_str = pattern.findall(text_lines2[text2_log_line])
+                print("log_str[0]=%s\n", log_str[0])
+                print("log_str[1]=%s\n", log_str[1])
+                sql_id = mysqlconnect(log_str[0], log_str[1])
                 print("sql_id=%d\n", sql_id)
                 sql_id_to_str = '%d' % sql_id
                 # str1 = pattern.sub(sql_id_to_str,  text_lines2[text2_log_line], re.DOTALL)
@@ -86,15 +86,18 @@ def analyzecode(file_path):
     finally:
         file.close()
 
-def mysqlconnect(str):
+def mysqlconnect(str,str2):
     Url = "http://www.baidu.com"
     Time = datetime.datetime.now()  # 系统当前时刻
     db = MySQLdb.connect("192.168.201.237", "root", "Mysql@123", "TESTDB", charset='utf8')
 
-    sql = "insert into log_test77(str, time) values('%s','%s')" % (str, Time)
+    sql = "insert into log2(str,str2, Time) values('%s','%s','%s')" % (str, str2, Time)
     cursor = db.cursor()
     try:
         cursor.execute(sql)
+        # param = (str0, str1, time)
+        # param = [(str, str2)]
+        # cursor.executemany(sql, param)
         db.commit()  # 提交到数据库执行，一定要记提交哦
         print("already commit")
         # print(db.insert_id()) last_id = curs.lastrowid
