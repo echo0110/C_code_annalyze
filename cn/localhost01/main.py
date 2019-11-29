@@ -59,42 +59,36 @@ def analyzecode(file_path):
                 log_line = i
                 print(log_line)
                 text2_log_line = log_line
-                # strinfo = re.compile('LOG_MSG')
-                # text_lines[log_line] = strinfo.sub('print_msg', text_lines[log_line])
-                # print(text_lines[log_line])
+                replace_log_line = log_line
                 while text_lines[log_line].find(";", 0, len(text_lines[log_line]) - 1) == -1:
                         text_lines2[text2_log_line] += text_lines[log_line+1]
                         log_line += 1
                         key += 1
                 pattern = re.compile(r'["](?:.|\n)*?["]')
                 log_str = pattern.findall(text_lines2[text2_log_line])
-                text_lines2_list = list(text_lines2[text2_log_line])
-                nPos = text_lines2_list.index('\\')
-                text_lines2_list[nPos+4] = '9'
-                # text_lines2_list.append(nPos+4, '9')
-                str_2 = "".join(text_lines2_list)
-                print(str_2)
-
-                # result = re.findall(".*entry(.*)for.*",string)
+                # text_lines2_list = list(text_lines2[text2_log_line])
 
 
-                # nPos = log_str[0].rfind('"', 0, len(log_str[0]))
-                # print("nPos=%d\n", nPos)
-                # A = list(text_lines2[text2_log_line])
-                # log_str0_len = len(A)
-                # text_lines2[text2_log_line].insert(log_str0_len+1, '/')
                 print("log_str[0]=%s\n", log_str[0])
                 print("log_str[1]=%s\n", log_str[1])
                 sql_id = mysqlconnect(log_str[0], log_str[1])
                 print("sql_id=%d\n", sql_id)
                 sql_id_to_str = '%d' % sql_id
+
+
                 # str1 = pattern.sub(sql_id_to_str,  text_lines2[text2_log_line], re.DOTALL)
-                str1 = pattern.sub(sql_id_to_str, text_lines[log_line], re.DOTALL)
-                print(str1)
-                # str.replace(text_lines2[text2_log_line], str1)
-                # print(text_lines2[text2_log_line])
-                text_lines[log_line] = str1
-                # print(text_lines2[text2_log_line])
+                # str1 = pattern.sub(sql_id_to_str, text_lines[log_line], re.DOTALL)
+                # print(str1)
+
+                strinfo = re.compile('ReplaceId')
+
+                while text_lines[replace_log_line].find(";", 0, len(text_lines[replace_log_line]) - 1) == -1:
+                    if text_lines[replace_log_line].find("ReplaceId", 0, len(text_lines[replace_log_line]) - 1) > 0:
+                        # text_lines[replace_log_line].replace("ReplaceId", "ni")
+                        text_lines[replace_log_line] = strinfo.sub(sql_id_to_str, text_lines[replace_log_line])
+                        print(text_lines[replace_log_line])
+                    replace_log_line += 1
+
         file.close()
         file = open(linux_path, 'w')
         file.writelines(text_lines)

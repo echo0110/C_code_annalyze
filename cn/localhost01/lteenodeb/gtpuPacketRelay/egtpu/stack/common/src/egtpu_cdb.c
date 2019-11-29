@@ -48,6 +48,7 @@ static egtpu_void_t *pool_alloc (egtpu_global_t *p_global,
 {
     egtpu_void_t *p_buf;
     U32bit      incr;
+	int ReplaceId=0;
 
     if (!(p_buf = egtpu_pool_alloc(pool)))
 	{
@@ -64,7 +65,7 @@ static egtpu_void_t *pool_alloc (egtpu_global_t *p_global,
 			LOG_ID_MSG("replaced id is:%d,logId is:%d, logLev is %d,logCat is:%d, globalTick is:%d,
 			intValOne is:%d, intValTwo is %d,intValThree is %d, intValFour is %d,
 			intValFive is:%d, floatValOne is %f,floatValTwo is %f, strValOne is %s,
-			strValTwo is %s\n",1,logId, logLev, logCat, relayGtpuCurrentTick_g,__LINE__,p_size->curr_size, 
+			strValTwo is %s\n",18, logLev, logCat, relayGtpuCurrentTick_g,__LINE__,p_size->curr_size, 
 			0,0,0,0,0,__func__,"MemFailed");
 			
 
