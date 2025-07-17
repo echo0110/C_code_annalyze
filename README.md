@@ -1,4 +1,11 @@
 
+Use Python to crawl the string in the C language .c code. The main implementation is in the main.py file.
+
+Linux environment:
+
+Put the main.py script in the code project directory, execute python main.py -i test.C. The main.py script will automatically find the test.c file and crawl the string in the log_id_msg function in the tets.c file. Connect to the mysql database and write to mysql.
+
+
 利用Python爬取C语言.c代码中的字符串
 主要实现是在main.py文件中
 
